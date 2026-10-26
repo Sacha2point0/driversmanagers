@@ -1,0 +1,11 @@
+# Utilisé seulement si la racine du (sous-)domaine pointe sur le dossier du dépôt
+# au lieu de public/. Tout est redirigé vers public/, le code et la configuration restent inaccessibles.
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^(config|src|views|content|database|storage|tools)(/|$) - [F,L]
+  RewriteRule ^(README\.md|\.git.*)$ - [F,L]
+  RewriteCond %{REQUEST_URI} !^/public/
+  RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
