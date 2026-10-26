@@ -55,21 +55,10 @@ final class Importer
                     $errors[] = 'Ligne ' . ($n + 2) . ' ignorée (email, prénom ou nom invalide).';
                     continue;
                 }
-                $teamId = null;
-                if ($teamName !== '') {
-                    if (!isset($teams[$teamName])) {
-                        DB::run('INSERT IGNORE INTO teams (name) VALUES (?)', [$teamName]);
-                        $teams[$teamName] = (int) DB::value('SELECT id FROM teams WHERE name = ?', [$teamName]);
-                    }
-                    $teamId = $teams[$teamName];
-                }
-                $existing = DB::value('SELECT id FROM participants WHERE email = ?', [$email]);
-                if ($existing) {
-                    DB::run('UPDATE participants SET first_name = ?, last_name = ?, team_id = ? WHERE id = ?', [$first, $last, $teamId, $existing]);
-                    $updated++;
-                } else {
-                    DB::run('INSERT INTO participants (email, first_name, last_name, team_id) VALUES (?, ?, ?, ?)', [$email, $first, $last, $teamId]);
+                if (self::upsert($email, $first, $last, $teamName, $teams) === 'created') {
                     $created++;
+                } else {
+                    $updated++;
                 }
             }
             $pdo->commit();
@@ -78,6 +67,31 @@ final class Importer
             return ['created' => 0, 'updated' => 0, 'errors' => ['Import annulé : ' . $e->getMessage()]];
         }
         return ['created' => $created, 'updated' => $updated, 'errors' => $errors];
+    }
+
+    /**
+     * Crée ou met à jour un participant (clé : email) et crée son équipe si besoin.
+     * Utilisé par l'import CSV et par l'ajout manuel. L'email doit être normalisé et valide.
+     * @param array<string,int> $teams cache nom d'équipe => id
+     * @return 'created'|'updated'
+     */
+    public static function upsert(string $email, string $first, string $last, string $teamName, array &$teams = []): string
+    {
+        $teamId = null;
+        if ($teamName !== '') {
+            if (!isset($teams[$teamName])) {
+                DB::run('INSERT IGNORE INTO teams (name) VALUES (?)', [$teamName]);
+                $teams[$teamName] = (int) DB::value('SELECT id FROM teams WHERE name = ?', [$teamName]);
+            }
+            $teamId = $teams[$teamName];
+        }
+        $existing = DB::value('SELECT id FROM participants WHERE email = ?', [$email]);
+        if ($existing) {
+            DB::run('UPDATE participants SET first_name = ?, last_name = ?, team_id = ? WHERE id = ?', [$first, $last, $teamId, $existing]);
+            return 'updated';
+        }
+        DB::run('INSERT INTO participants (email, first_name, last_name, team_id) VALUES (?, ?, ?, ?)', [$email, $first, $last, $teamId]);
+        return 'created';
     }
 
     private static function key(string $h): string

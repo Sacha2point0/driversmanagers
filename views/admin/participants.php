@@ -11,6 +11,22 @@
   </form>
 </div>
 
+<div class="card soft">
+  <h3>Ajouter un participant</h3>
+  <p class="small mt0">Pour un ajout de dernière minute. Si l’email existe déjà, le participant est mis à jour (nom, équipe) sans toucher à son questionnaire. Une équipe qui n’existe pas encore est créée.</p>
+  <form method="post" action="<?= url('/admin/participants/ajouter') ?>" class="add-participant">
+    <?= csrf_field() ?>
+    <label>Prénom<input type="text" name="prenom" value="<?= e($old['prenom'] ?? '') ?>" required autocomplete="off"></label>
+    <label>Nom<input type="text" name="nom" value="<?= e($old['nom'] ?? '') ?>" required autocomplete="off"></label>
+    <label>Email<input type="email" name="email" value="<?= e($old['email'] ?? '') ?>" required autocomplete="off"></label>
+    <label>Équipe<input type="text" name="equipe" value="<?= e($old['equipe'] ?? '') ?>" list="teams-list" autocomplete="off" placeholder="Choisir ou saisir"></label>
+    <datalist id="teams-list">
+      <?php foreach ($teams as $t): ?><option value="<?= e($t['name']) ?>"><?php endforeach; ?>
+    </datalist>
+    <button class="btn small">Ajouter</button>
+  </form>
+</div>
+
 <p>
   <a class="btn small <?= $filter ? 'secondary' : '' ?>" href="<?= url('/admin/participants') ?>">Tous<?= $filter ? '' : ' (' . count($list) . ')' ?></a>
   <a class="btn small <?= $filter === 'a-relancer' ? '' : 'secondary' ?>" href="<?= url('/admin/participants?filtre=a-relancer') ?>">Questionnaire à faire<?= $filter ? ' (' . count($list) . ')' : '' ?></a>

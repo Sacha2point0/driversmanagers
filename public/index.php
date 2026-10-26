@@ -49,6 +49,7 @@ $r->get('/admin', [C\AdminController::class, 'dashboard']);
 $r->post('/admin/sequences', [C\AdminController::class, 'sequences']);
 $r->get('/admin/participants', [C\AdminController::class, 'participants']);
 $r->post('/admin/import', [C\AdminController::class, 'import']);
+$r->post('/admin/participants/ajouter', [C\AdminController::class, 'addParticipant']);
 $r->post('/admin/participants/{id}/reset', [C\AdminController::class, 'resetQuestionnaire']);
 $r->get('/admin/code', [C\AdminController::class, 'code']);
 $r->get('/admin/rencontres', [C\AdminController::class, 'rencontres']);

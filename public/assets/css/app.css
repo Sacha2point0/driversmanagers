@@ -260,3 +260,8 @@ body.pleniere { background: var(--bleu); color: #fff; }
 .right { text-align: right; }
 .hidden { display: none !important; }
 .badge-team { background: var(--vert); color: var(--bleu); border-radius: 999px; padding: 3px 12px; font-weight: 800; font-size: 13px; }
+
+/* Admin : ajout d'un participant */
+.add-participant { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; align-items: end; }
+.add-participant label { margin: 0; font-size: 14px; }
+.add-participant input { margin-top: 4px; }

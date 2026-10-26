@@ -87,7 +87,34 @@ final class AdminController
         if ($filter === 'a-relancer') {
             $list = array_values(array_filter($list, fn ($p) => !$p['dominant']));
         }
-        $this->render('admin/participants', 'Participants', ['list' => $list, 'filter' => $filter, 'drivers' => content('drivers')]);
+        $this->render('admin/participants', 'Participants', [
+            'list'    => $list,
+            'filter'  => $filter,
+            'drivers' => content('drivers'),
+            'teams'   => DB::all('SELECT name FROM teams ORDER BY name'),
+            'old'     => $_SESSION['add_old'] ?? [],
+        ]);
+        unset($_SESSION['add_old']);
+    }
+
+    public function addParticipant(): void
+    {
+        Auth::requireAdmin();
+        csrf_check();
+        $email = Participant::normalizeEmail((string) ($_POST['email'] ?? ''));
+        $first = trim((string) ($_POST['prenom'] ?? ''));
+        $last = trim((string) ($_POST['nom'] ?? ''));
+        $team = trim((string) ($_POST['equipe'] ?? ''));
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $first === '' || $last === '') {
+            $_SESSION['add_old'] = ['email' => $email, 'prenom' => $first, 'nom' => $last, 'equipe' => $team];
+            flash('error', 'Renseignez un email valide, un prénom et un nom.');
+            redirect('/admin/participants');
+        }
+        $r = Importer::upsert($email, $first, $last, $team);
+        flash('success', $r === 'created'
+            ? $first . ' ' . $last . ' a été ajouté(e).'
+            : 'Cet email existait déjà : ' . $first . ' ' . $last . ' a été mis(e) à jour, sans toucher à son questionnaire.');
+        redirect('/admin/participants');
     }
 
     public function import(): void
