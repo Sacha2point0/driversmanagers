@@ -132,6 +132,74 @@ final class AdminController
         redirect('/admin/participants');
     }
 
+    public function editParticipant(string $id): void
+    {
+        Auth::requireAdmin();
+        $p = Participant::find((int) $id);
+        if (!$p) {
+            flash('error', 'Ce participant n’existe plus.');
+            redirect('/admin/participants');
+        }
+        $old = $_SESSION['edit_old'] ?? [];
+        unset($_SESSION['edit_old']);
+        $this->render('admin/participant_edit', 'Modifier un participant', [
+            'nav'      => 'admin/participants',
+            'p'        => $p,
+            'old'      => $old,
+            'teams'    => DB::all('SELECT name FROM teams ORDER BY name'),
+            'drivers'  => content('drivers'),
+            'made'     => (int) DB::value('SELECT COUNT(*) FROM encounters WHERE participant_id = ?', [$p['id']]),
+            'received' => (int) DB::value('SELECT COUNT(*) FROM encounters WHERE met_participant_id = ?', [$p['id']]),
+        ]);
+    }
+
+    public function updateParticipant(string $id): void
+    {
+        Auth::requireAdmin();
+        csrf_check();
+        $p = Participant::find((int) $id);
+        if (!$p) {
+            flash('error', 'Ce participant n’existe plus.');
+            redirect('/admin/participants');
+        }
+        $email = Participant::normalizeEmail((string) ($_POST['email'] ?? ''));
+        $first = trim((string) ($_POST['prenom'] ?? ''));
+        $last = trim((string) ($_POST['nom'] ?? ''));
+        $team = trim((string) ($_POST['equipe'] ?? ''));
+        $back = '/admin/participants/' . (int) $p['id'];
+        $_SESSION['edit_old'] = ['email' => $email, 'prenom' => $first, 'nom' => $last, 'equipe' => $team];
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $first === '' || $last === '') {
+            flash('error', 'Renseignez un email valide, un prénom et un nom.');
+            redirect($back);
+        }
+        if (DB::value('SELECT id FROM participants WHERE email = ? AND id <> ?', [$email, $p['id']])) {
+            flash('error', 'Cet email est déjà utilisé par un autre participant.');
+            redirect($back);
+        }
+        $teamId = null;
+        if ($team !== '') {
+            DB::run('INSERT IGNORE INTO teams (name) VALUES (?)', [$team]);
+            $teamId = (int) DB::value('SELECT id FROM teams WHERE name = ?', [$team]);
+        }
+        DB::run('UPDATE participants SET email = ?, first_name = ?, last_name = ?, team_id = ? WHERE id = ?', [$email, $first, $last, $teamId, $p['id']]);
+        unset($_SESSION['edit_old']);
+        flash('success', $first . ' ' . $last . ' a été mis(e) à jour.');
+        redirect('/admin/participants');
+    }
+
+    public function deleteParticipant(string $id): void
+    {
+        Auth::requireAdmin();
+        csrf_check();
+        $p = Participant::find((int) $id);
+        if ($p) {
+            // Le questionnaire et les rencontres (faites et reçues) sont supprimés en cascade
+            DB::run('DELETE FROM participants WHERE id = ?', [$p['id']]);
+            flash('success', $p['first_name'] . ' ' . $p['last_name'] . ' a été supprimé(e).');
+        }
+        redirect('/admin/participants');
+    }
+
     public function resetQuestionnaire(string $id): void
     {
         Auth::requireAdmin();

@@ -48,7 +48,8 @@
       <td><?= e($p['team_name'] ?? '–') ?></td>
       <td><?= $p['dominant'] ? e($drivers[$p['dominant']]['nom']) : '<span class="muted">à faire</span>' ?></td>
       <td class="small"><?= e($p['last_login_at'] ?? '–') ?></td>
-      <td>
+      <td class="nowrap">
+        <a class="btn small secondary" href="<?= url('/admin/participants/' . (int) $p['id']) ?>">Modifier</a>
         <?php if ($p['dominant']): ?>
           <form method="post" action="<?= url('/admin/participants/' . (int) $p['id'] . '/reset') ?>" class="inline">
             <?= csrf_field() ?><button class="btn small secondary" data-confirm="Effacer le questionnaire de <?= e($p['first_name']) ?> ? Il ou elle pourra le refaire.">Réinitialiser</button>
