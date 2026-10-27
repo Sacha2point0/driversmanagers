@@ -38,9 +38,10 @@ include ROOT . '/views/admin/_nav.php';
     <h2 class="mt0">Répartition des drivers dans la salle</h2>
     <div class="gauges">
       <?php foreach ($distribution as $code => $n): ?>
+        <?php if ($code === 'egalite' && !$n) continue; ?>
         <div class="gauge">
-          <?= Signs::svg($code, 30) ?>
-          <span><?= e($drivers[$code]['nom']) ?></span>
+          <?= $code === 'egalite' ? '<span class="center" style="font-weight:900">=</span>' : Signs::svg($code, 30) ?>
+          <span><?= $code === 'egalite' ? 'Égalité entre drivers' : e($drivers[$code]['nom']) ?></span>
           <span class="track"><i style="width:<?= max(2, round(100 * $n / $totalDist)) ?>%"></i></span>
           <span class="right"><?= $n ?></span>
         </div>

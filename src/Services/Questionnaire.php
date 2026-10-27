@@ -46,6 +46,89 @@ final class Questionnaire
         return array_values(array_keys(array_filter($scores, fn ($s) => $s === $top)));
     }
 
+    /** Niveau d'un score : faible (≤ seuil), marque, fort. */
+    public static function level(int $score): string
+    {
+        $l = content('questionnaire')['lecture'];
+        return $score <= $l['seuil'] ? 'faible' : ($score <= $l['tres_marque'] ? 'marque' : 'fort');
+    }
+
+    public const LEVEL_LABELS = ['faible' => 'peu déterminant', 'marque' => 'marqué', 'fort' => 'très marqué'];
+
+    /**
+     * Lecture d'ensemble du profil.
+     * - principaux : drivers au score le plus élevé (plusieurs en cas d'égalité) ;
+     * - secondaires : autres drivers marqués (au-dessus du seuil) ou proches du principal ;
+     * - faible : le score le plus élevé ne dépasse pas le seuil (aucun driver déterminant) ;
+     * - paires : combinaisons à commenter, entre les 3 drivers les plus marqués au-dessus du seuil.
+     */
+    public static function profile(array $scores): array
+    {
+        $l = content('questionnaire')['lecture'];
+        $principaux = self::dominants($scores);
+        $top = max($scores);
+        $secondaires = [];
+        foreach ($scores as $d => $v) {
+            if (!in_array($d, $principaux, true) && ($v > $l['seuil'] || $top - $v <= $l['ecart_proche'])) {
+                $secondaires[$d] = $v;
+            }
+        }
+        arsort($secondaires);
+        $secondaires = array_keys($secondaires);
+
+        $actifs = array_values(array_filter(
+            array_merge($principaux, $secondaires),
+            fn ($d) => $scores[$d] > $l['seuil']
+        ));
+        $actifs = array_slice($actifs, 0, 3);
+        $paires = [];
+        for ($i = 0; $i < count($actifs); $i++) {
+            for ($j = $i + 1; $j < count($actifs); $j++) {
+                $paires[] = self::pairKey($actifs[$i], $actifs[$j]);
+            }
+        }
+
+        return [
+            'principaux'  => $principaux,
+            'secondaires' => $secondaires,
+            'egalite'     => count($principaux) > 1,
+            'faible'      => $top <= $l['seuil'],
+            'paires'      => $paires,
+            'niveaux'     => array_map(fn ($v) => self::level((int) $v), $scores),
+        ];
+    }
+
+    /** Clé d'une paire de drivers dans l'ordre de référence (ex. sp_dt). */
+    public static function pairKey(string $a, string $b): string
+    {
+        $order = array_flip(self::DRIVERS);
+        return $order[$a] < $order[$b] ? $a . '_' . $b : $b . '_' . $a;
+    }
+
+    /** Scores d'une ligne SQL contenant score_sp… score_dt, ou null si le questionnaire n'est pas fait. */
+    public static function scoresFromRow(array $row): ?array
+    {
+        if (!isset($row['score_sp'])) {
+            return null;
+        }
+        $out = [];
+        foreach (self::DRIVERS as $d) {
+            $out[$d] = (int) $row['score_' . $d];
+        }
+        return $out;
+    }
+
+    /** Libellé du ou des drivers principaux, égalités indiquées (« Sois parfait = Fais plaisir »). */
+    public static function label(array $row): string
+    {
+        $scores = self::scoresFromRow($row);
+        if (!$scores) {
+            return '';
+        }
+        $drivers = content('drivers');
+        return implode(' = ', array_map(fn ($d) => $drivers[$d]['nom'], self::dominants($scores)));
+    }
+
     public static function save(int $participantId, array $result): void
     {
         $s = $result['scores'];
@@ -67,7 +150,7 @@ final class Questionnaire
         foreach (self::DRIVERS as $d) {
             $scores[$d] = (int) $r['score_' . $d];
         }
-        return ['scores' => $scores, 'dominants' => self::dominants($scores), 'completed_at' => $r['completed_at']];
+        return ['scores' => $scores, 'dominants' => self::dominants($scores), 'profil' => self::profile($scores), 'completed_at' => $r['completed_at']];
     }
 
     /** Score maximum possible par driver (pour les jauges). */
@@ -85,12 +168,13 @@ final class Questionnaire
         return min($count) * min(array_keys($q['echelle']));
     }
 
-    /** Répartition des drivers dominants (statistiques anonymes). */
+    /** Répartition des drivers dominants (statistiques anonymes) ; les égalités sont comptées à part. */
     public static function distribution(): array
     {
-        $out = array_fill_keys(self::DRIVERS, 0);
-        foreach (DB::all('SELECT dominant, COUNT(*) n FROM questionnaire_results GROUP BY dominant') as $r) {
-            $out[$r['dominant']] = (int) $r['n'];
+        $out = array_fill_keys(self::DRIVERS, 0) + ['egalite' => 0];
+        foreach (DB::all('SELECT score_sp, score_fp, score_sf, score_fe, score_dt FROM questionnaire_results') as $r) {
+            $dom = self::dominants(self::scoresFromRow($r));
+            $out[count($dom) > 1 ? 'egalite' : $dom[0]]++;
         }
         return $out;
     }

@@ -12,6 +12,12 @@
  */
 return [
     'intro' => 'Pour chaque affirmation, indiquez à quel point elle vous ressemble. Il n’y a pas de bonne ou de mauvaise réponse : répondez spontanément. Comptez environ 10 minutes.',
+    // Lecture du profil (scores de 0 à 40 par driver)
+    'lecture' => [
+        'seuil'        => 20,  // jusqu'à 20 : driver peu déterminant
+        'tres_marque'  => 30,  // de 21 à 30 : marqué ; au-delà : très marqué
+        'ecart_proche' => 4,   // écart avec le driver principal jusqu'auquel un driver est jugé « proche »
+    ],
     'echelle' => [
         0 => 'Ce n’est pas moi',
         1 => 'C’est rarement moi',

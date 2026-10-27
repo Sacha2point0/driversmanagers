@@ -377,12 +377,17 @@ final class AdminController
             case 'participants.csv':
                 $head = ['email', 'prenom', 'nom', 'equipe', 'driver_dominant', 'questionnaire_le', 'derniere_connexion'];
                 $rows = array_map(fn ($p) => [$p['email'], $p['first_name'], $p['last_name'], $p['team_name'],
-                    $p['dominant'] ? $drivers[$p['dominant']]['nom'] : '', $p['questionnaire_done_at'], $p['last_login_at']], Participant::all());
+                    $p['dominant'] ? Questionnaire::label($p) : '', $p['questionnaire_done_at'], $p['last_login_at']], Participant::all());
                 break;
             case 'scores-questionnaire.csv':
-                $head = ['email', 'prenom', 'nom', 'equipe', 'sois_parfait', 'fais_plaisir', 'sois_fort', 'fais_des_efforts', 'depeche_toi', 'dominant'];
-                $rows = array_map(fn ($r) => array_values($r), DB::all(
-                    'SELECT p.email, p.first_name, p.last_name, t.name, r.score_sp, r.score_fp, r.score_sf, r.score_fe, r.score_dt, r.dominant
+                $head = ['email', 'prenom', 'nom', 'equipe', 'sois_parfait', 'fais_plaisir', 'sois_fort', 'fais_des_efforts', 'depeche_toi', 'driver_principal', 'lecture'];
+                $rows = array_map(function ($r) {
+                    $prof = Questionnaire::profile(Questionnaire::scoresFromRow($r));
+                    $lecture = $prof['faible'] ? 'aucun driver déterminant' : ($prof['egalite'] ? 'égalité' : ($prof['secondaires'] ? 'profil combiné' : 'driver net'));
+                    return [$r['email'], $r['first_name'], $r['last_name'], $r['name'], $r['score_sp'], $r['score_fp'], $r['score_sf'], $r['score_fe'], $r['score_dt'],
+                        Questionnaire::label($r), $lecture];
+                }, DB::all(
+                    'SELECT p.email, p.first_name, p.last_name, t.name, r.score_sp, r.score_fp, r.score_sf, r.score_fe, r.score_dt
                      FROM questionnaire_results r JOIN participants p ON p.id = r.participant_id LEFT JOIN teams t ON t.id = p.team_id ORDER BY p.last_name'
                 ));
                 break;
@@ -419,9 +424,9 @@ final class AdminController
         header('Content-Disposition: attachment; filename="permis-' . $type . '"');
         $out = fopen('php://output', 'w');
         fwrite($out, "\xEF\xBB\xBF"); // BOM pour Excel
-        fputcsv($out, $head, ';');
+        fputcsv($out, $head, ';', '"', '');
         foreach ($rows as $row) {
-            fputcsv($out, $row, ';');
+            fputcsv($out, $row, ';', '"', '');
         }
         fclose($out);
         exit;

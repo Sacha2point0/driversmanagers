@@ -281,3 +281,21 @@ td.nowrap { white-space: nowrap; }
 .confirm-box { background: #fff; color: var(--bleu); border-radius: var(--radius); padding: 22px; max-width: 420px; width: 100%; box-shadow: 0 12px 40px rgba(18, 38, 170, .25); }
 .confirm-box p { margin: 0 0 18px; font-weight: 700; font-size: 17px; }
 .confirm-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+
+/* Lecture du profil */
+.niveau { display: inline-block; font-weight: 800; font-size: 13px; border-radius: 999px; padding: 3px 12px; margin: 8px 0 0; }
+.niveau.niveau-faible { background: var(--doux); }
+.niveau.niveau-marque { background: #DFF7EF; }
+.niveau.niveau-fort { background: #FFE6E1; }
+.lecture { background: var(--doux); border-radius: 12px; padding: 12px 14px; margin-top: 12px; font-weight: 600; line-height: 1.5; }
+.result-tie { display: grid; gap: 12px; margin: 8px 0; }
+@media (min-width: 640px) { .result-tie { grid-template-columns: 1fr 1fr; } }
+.gauge .track { position: relative; }
+.gauge .track[style*="--seuil"]::after { content: ''; position: absolute; top: -3px; bottom: -3px; left: var(--seuil, 50%); width: 2px; background: var(--bleu); opacity: .45; }
+.gauge.niveau-faible .track i { background: #AEB6E6; }
+.gauge.niveau-marque .track i { background: var(--bleu); }
+.gauge.niveau-fort .track i { background: var(--corail); }
+.gauge.niveau-faible { font-weight: 600; }
+.profil-titre, .combi-titre { display: flex; align-items: center; gap: 8px; }
+.combi-titre svg + svg { margin-left: -4px; }
+.card.secondaire { border-left: 6px solid var(--trait); }

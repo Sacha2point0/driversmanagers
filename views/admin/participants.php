@@ -46,7 +46,7 @@
       <td><strong><?= e($p['last_name']) ?></strong> <?= e($p['first_name']) ?></td>
       <td><?= e($p['email']) ?></td>
       <td><?= e($p['team_name'] ?? '–') ?></td>
-      <td><?= $p['dominant'] ? e($drivers[$p['dominant']]['nom']) : '<span class="muted">à faire</span>' ?></td>
+      <td><?= $p['dominant'] ? e(\App\Services\Questionnaire::label($p)) : '<span class="muted">à faire</span>' ?></td>
       <td class="small"><?= e($p['last_login_at'] ?? '–') ?></td>
       <td class="nowrap">
         <a class="btn small secondary" href="<?= url('/admin/participants/' . (int) $p['id']) ?>">Modifier</a>

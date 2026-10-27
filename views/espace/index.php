@@ -27,7 +27,8 @@ $epreuveOpen = $open['manoeuvres_open'] || $open['cas_open'];
     <a class="tile" href="<?= url('/resultat') ?>" style="--tile-color:var(--corail)">
       <span class="num">1</span>
       <h3>Mon bilan de conduite</h3>
-      <span class="small">Mon driver : <strong><?= e($drivers[$me['dominant']]['nom']) ?></strong></span>
+      <?php $lbl = \App\Services\Questionnaire::label($me); ?>
+      <span class="small"><?= str_contains($lbl, '=') ? 'Mes drivers, à égalité' : 'Mon driver' ?> : <strong><?= e($lbl) ?></strong></span>
       <span class="status">✓ Fait · voir mon résultat →</span>
     </a>
   <?php elseif ($open['questionnaire_open']): ?>

@@ -7,7 +7,7 @@ use App\Core\Database as DB;
 
 final class Participant
 {
-    private const SELECT = 'SELECT p.*, t.name AS team_name, r.dominant, r.completed_at AS questionnaire_done_at
+    private const SELECT = 'SELECT p.*, t.name AS team_name, r.dominant, r.score_sp, r.score_fp, r.score_sf, r.score_fe, r.score_dt, r.completed_at AS questionnaire_done_at
         FROM participants p
         LEFT JOIN teams t ON t.id = p.team_id
         LEFT JOIN questionnaire_results r ON r.participant_id = p.id';

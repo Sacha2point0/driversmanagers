@@ -21,7 +21,7 @@
 <div class="card soft">
   <h3>Supprimer</h3>
   <p class="small mt0">
-    Bilan de conduite : <?= $p['dominant'] ? 'fait (' . e($drivers[$p['dominant']]['nom']) . ')' : 'à faire' ?>.
+    Bilan de conduite : <?= $p['dominant'] ? 'fait (' . e(\App\Services\Questionnaire::label($p)) . ')' : 'à faire' ?>.
     Rencontres enregistrées par <?= e($p['first_name']) ?> : <?= $made ?>. Rencontres où d’autres l’ont rencontré(e) : <?= $received ?>.
   </p>
   <p class="small">La suppression efface définitivement le participant, son bilan de conduite et toutes ses rencontres<?= $received ? ', y compris ' . $received . ' rencontre(s) enregistrée(s) par d’autres participants : leurs points et ceux de leur équipe baisseront' : '' ?>. Les saisies d’équipe (code, manœuvres, cas) sont conservées.</p>

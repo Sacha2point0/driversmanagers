@@ -26,8 +26,9 @@ Déroulé de l'après-midi : mini-conférence (« La leçon de code »), icebrea
 
 ## Points ouverts
 - **Questionnaire** : intégré le 26/10/2026 depuis « Questionnaire Les drivers - worklab.pdf » (50 items, 10 par driver, échelle 0 à 4, score 0 à 40, somme simple). Une réponse absente compte comme manquante (pas comme 0).
-- Textes de résultat (`content/drivers.php`) et du corrigé du code (`corrige` dans `content/cartes.php`) à valider par Sacha.
-- Égalité de scores : le 1er dans l'ordre `sp, fp, sf, fe, dt` est enregistré comme dominant (biais possible vers « Sois parfait » dans les stats).
+- Lecture du profil (`Questionnaire::profile`, seuils dans `lecture` de `content/questionnaire.php`) : ≤ 20/40 peu déterminant, 21-30 marqué, > 30 très marqué ; drivers « proches » à 4 points ou moins du principal. La page de résultat décrit le ou les principaux (égalité affichée, profils complets de chacun), les autres drivers marqués ou proches, et les combinaisons entre les 3 drivers les plus marqués (`content/combinaisons.php`). Grille d'origine du PDF conservée (décision de Sacha).
+- Égalités : affichées partout (« X = Y ») et comptées à part dans la répartition. La colonne `dominant` en base garde le 1er dans l'ordre `sp, fp, sf, fe, dt` ; seules les stats de devinettes des rencontres l'utilisent encore.
+- Textes à valider par Sacha : résultats (`content/drivers.php`), combinaisons (`content/combinaisons.php`), corrigé du code (`corrige` dans `content/cartes.php`), « à retenir » des manœuvres.
 - Nom du modèle IA (`ai.model`) à vérifier ; tester la vraie clé avant le séminaire.
 
 ## Déploiement (en cours)
