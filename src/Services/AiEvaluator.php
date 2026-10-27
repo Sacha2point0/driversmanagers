@@ -65,7 +65,6 @@ final class AiEvaluator
         $payload = [
             'model'       => Config::get('ai.model', 'claude-sonnet-5-5'),
             'max_tokens'  => (int) Config::get('ai.max_tokens', 600),
-            'temperature' => 0,
             'system'      => $system,
             'messages'    => [[
                 'role'    => 'user',

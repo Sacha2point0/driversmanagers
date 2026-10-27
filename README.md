@@ -90,7 +90,7 @@ Les textes de résultat (`content/drivers.php`) sont à valider avant l'ouvertur
 ## L'évaluation des cas par l'IA
 
 - La réponse de l'équipe est **toujours enregistrée avant** l'appel à l'API.
-- L'appel se fait au moment de l'envoi (température 0, réponse attendue en JSON). En cas d'échec (clé absente, API saturée, délai dépassé), la réponse passe en *échec IA* : l'animateur peut **relancer l'IA** ou **saisir une note** depuis *Cas (IA)*.
+- L'appel se fait au moment de l'envoi (réponse attendue en JSON ; le paramètre `temperature` n’est pas envoyé, les modèles Claude récents le refusent). En cas d'échec (clé absente, API saturée, délai dépassé), la réponse passe en *échec IA* : l'animateur peut **relancer l'IA** ou **saisir une note** depuis *Cas (IA)*.
 - Une note saisie par l'animateur remplace toujours celle de l'IA.
 - Le prompt système et le référentiel de chaque cas sont dans `content/prompts/`. Tester une dizaine de réponses par cas avant l'événement et ajuster le référentiel si une note paraît injuste.
 
