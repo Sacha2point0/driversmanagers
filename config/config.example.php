@@ -31,8 +31,9 @@ return [
     'ai' => [
         'api_key'     => '',                    // sk-ant-...
         'model'       => 'claude-sonnet-5-5',   // vérifier le nom du modèle sur docs.claude.com
-        'timeout'     => 40,                    // secondes
-        'max_tokens'  => 600,
+        'timeout'     => 60,                    // secondes
+        'max_tokens'  => 4000,                  // minimum 4000 : le raisonnement du modèle compte dedans
+        'effort'      => 'low',                 // effort de raisonnement : low, medium, high
     ],
 
     // Points de permis

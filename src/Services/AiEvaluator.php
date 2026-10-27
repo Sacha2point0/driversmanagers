@@ -64,7 +64,11 @@ final class AiEvaluator
         }
         $payload = [
             'model'       => Config::get('ai.model', 'claude-sonnet-5-5'),
-            'max_tokens'  => (int) Config::get('ai.max_tokens', 600),
+            // Claude Sonnet 5.5 réfléchit avant de répondre et ce raisonnement compte dans max_tokens :
+            // en dessous de 4000, il peut épuiser la limite avant d'écrire le JSON (réponse vide).
+            'max_tokens'  => max(4000, (int) Config::get('ai.max_tokens', 4000)),
+            // Effort de raisonnement : « low » suffit pour appliquer une grille et garde l'appel rapide.
+            'output_config' => ['effort' => (string) Config::get('ai.effort', 'low')],
             'system'      => $system,
             'messages'    => [[
                 'role'    => 'user',
@@ -95,6 +99,11 @@ final class AiEvaluator
             throw new \RuntimeException('API HTTP ' . $status . ' : ' . mb_substr((string) $body, 0, 500));
         }
         $json = json_decode((string) $body, true);
+        $stop = (string) ($json['stop_reason'] ?? '');
+        if ($stop === 'refusal') {
+            throw new \RuntimeException('Le modèle a refusé d’évaluer cette réponse (catégorie : '
+                . ($json['stop_details']['category'] ?? 'inconnue') . '). Notez-la à la main.');
+        }
         $text = '';
         foreach ($json['content'] ?? [] as $block) {
             if (($block['type'] ?? '') === 'text') {
@@ -102,7 +111,9 @@ final class AiEvaluator
             }
         }
         if ($text === '') {
-            throw new \RuntimeException('Réponse API vide');
+            throw new \RuntimeException($stop === 'max_tokens'
+                ? 'Limite de tokens atteinte avant la réponse (ai.max_tokens trop bas). Relancez l’IA.'
+                : 'Réponse API vide (stop_reason : ' . ($stop ?: 'inconnu') . ')');
         }
         return $text;
     }
