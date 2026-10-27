@@ -1,11 +1,13 @@
 <?php
+use App\Services\Diagnostic;
 use App\Services\Questionnaire;
 use App\Services\Signs;
 
 $p = $res['profil'];
 $scores = $res['scores'];
 $lecture = content('questionnaire')['lecture'];
-$combis = content('combinaisons');
+$diag_c = content('diagnostic');
+$diag = Diagnostic::build($scores);
 $niv = fn (string $c) => Questionnaire::LEVEL_LABELS[$p['niveaux'][$c]];
 $noms = fn (array $codes) => implode(' et ', array_map(fn ($c) => $drivers[$c]['nom'], $codes));
 $principaux = $p['principaux'];
@@ -79,74 +81,54 @@ arsort($sorted);
       </div>
     <?php endforeach; ?>
   </div>
-  <p class="help"><?= fr('Le trait sur chaque jauge marque ' . $lecture['seuil'] . '/40. Jusqu’à ' . $lecture['seuil'] . ', un driver est peu déterminant ; de ' . ($lecture['seuil'] + 1) . ' à ' . $lecture['tres_marque'] . ', il est marqué ; au-delà, très marqué. Chacun de nous a les 5 drivers en lui, à des intensités différentes : un driver n’est pas un trait de caractère, c’est un comportement qui s’allume sous pression.') ?></p>
+  <p class="help"><?= fr('Le trait sur chaque jauge marque ' . $lecture['seuil'] . '/40. Jusqu’à ' . $lecture['seuil'] . ', un driver est peu déterminant ; de ' . ($lecture['seuil'] + 1) . ' à ' . $lecture['tres_marque'] . ', il est marqué ; au-delà, très marqué.') ?></p>
+  <div class="definition">
+    <h3 class="mt0">Qu’est-ce qu’un driver ?</h3>
+    <?php foreach ($diag_c['definition'] as $para): ?><p><?= fr(e($para)) ?></p><?php endforeach; ?>
+  </div>
 </div>
 
-<?php foreach ($principaux as $c): $d = $drivers[$c]; ?>
-  <?php if ($p['egalite']): ?><h2 class="profil-titre"><?= Signs::svg($c, 34) ?> Profil <?= e($d['nom']) ?></h2><?php endif; ?>
-  <div class="card<?= $p['egalite'] ? ' mt0' : '' ?>">
-    <p class="mt0 mb0"><?= fr(e($d['synthese'])) ?></p>
-  </div>
+<h2>Mon diagnostic</h2>
+<div class="card diagnostic">
+  <?php foreach ($diag['paragraphes'] as $para): ?><p><?= fr(e($para)) ?></p><?php endforeach; ?>
+</div>
 
-  <h2><?= $p['egalite'] ? 'Dans mon rôle de manager · ' . e($d['nom']) : 'Dans mon rôle de manager' ?></h2>
-  <div class="cols">
-    <div class="card mt0">
-      <h3>Mes atouts</h3>
-      <ul class="clean"><?php foreach ($d['atouts'] as $a): ?><li><?= fr(e($a)) ?></li><?php endforeach; ?></ul>
-    </div>
-    <div class="voyant">
-      <h3>🔴 Mon voyant d’alerte</h3>
-      <p class="small mt0">Quand la pression monte, je risque de…</p>
-      <ul class="clean"><?php foreach ($d['voyant'] as $a): ?><li><?= fr(e($a)) ?></li><?php endforeach; ?></ul>
-    </div>
+<?php
+$sig = $diag['significatifs'];
+$pr = $diag['principaux'];
+$nomsSig = Diagnostic::liste(array_map(fn ($c) => $drivers[$c]['nom'], $sig));
+?>
+<h2>Dans mon rôle de manager</h2>
+<?php if (count($sig) > 1): ?><p class="small mt0"><?= fr('À partir de vos drivers les plus présents : ' . e($nomsSig) . '.') ?></p><?php endif; ?>
+<div class="cols">
+  <div class="card mt0">
+    <h3>Mes atouts</h3>
+    <ul class="clean"><?php foreach (Diagnostic::pick($sig, $pr, 'atouts') as $a): ?><li><?= fr(e($a)) ?></li><?php endforeach; ?></ul>
   </div>
-  <div class="card soft">
-    <h3>Ce que vit mon équipe</h3>
-    <p class="mt0"><?= fr(e($d['equipe'])) ?></p>
+  <div class="voyant">
+    <h3>🔴 Mon voyant d’alerte</h3>
+    <p class="small mt0">Quand la pression monte, je risque de…</p>
+    <ul class="clean"><?php foreach (Diagnostic::pick($sig, $pr, 'voyant') as $a): ?><li><?= fr(e($a)) ?></li><?php endforeach; ?></ul>
   </div>
+</div>
+<div class="card soft">
+  <h3>Ce que vit mon équipe</h3>
+  <p class="mt0"><?= fr(e($drivers[$sig[0]]['equipe'])) ?><?php foreach (array_slice($sig, 1) as $c): ?> <?= fr(e($drivers[$c]['equipe_court'])) ?><?php endforeach; ?></p>
+</div>
 
-  <div class="feu-vert">
-    <span class="kicker">🟢 Mon feu vert</span>
-    <h2 class="mt0"><?= fr(e($d['feu_vert'])) ?></h2>
-    <p><?= fr(e($d['feu_vert_texte'])) ?></p>
-  </div>
-
-  <h2>Mes conseils de conduite<?= $p['egalite'] ? ' · ' . e($d['nom']) : '' ?></h2>
-  <div class="card">
-    <ol class="clean"><?php foreach ($d['conseils'] as $a): ?><li><?= fr(e($a)) ?></li><?php endforeach; ?></ol>
-  </div>
-<?php endforeach; ?>
-
-<?php if ($p['secondaires']): ?>
-  <h2>Mes autres drivers à surveiller</h2>
-  <p class="small mt0"><?= fr($p['faible']
-      ? 'Ces drivers sont proches de votre tendance principale, avec une intensité faible eux aussi.'
-      : 'Ces drivers sont marqués ou proches de votre driver principal : ils peuvent aussi prendre le volant sous pression.') ?></p>
-  <?php foreach ($p['secondaires'] as $c): $d = $drivers[$c]; ?>
-    <div class="card secondaire">
-      <div class="result-hero">
-        <?= Signs::svg($c, 44) ?>
-        <div>
-          <h3 class="mt0" style="margin-bottom:2px"><?= e($d['nom']) ?></h3>
-          <span class="niveau niveau-<?= e($p['niveaux'][$c]) ?>"><?= fr($niv($c) . ' (' . $scores[$c] . '/40)') ?></span>
-        </div>
-      </div>
-      <p><?= fr(e($d['synthese'])) ?></p>
-      <p class="small mb0"><strong>Voyant d’alerte :</strong> <?= fr(e(implode(' ', $d['voyant']))) ?></p>
-      <p class="small mb0"><strong>Feu vert :</strong> <?= fr(e($d['feu_vert'] . '. ' . $d['feu_vert_texte'])) ?></p>
-    </div>
+<div class="feu-vert">
+  <span class="kicker">🟢 Mon feu vert</span>
+  <h2 class="mt0"><?= fr(e($drivers[$sig[0]]['feu_vert'])) ?></h2>
+  <p><?= fr(e($drivers[$sig[0]]['feu_vert_texte'])) ?></p>
+  <?php foreach (array_slice($sig, 1) as $c): ?>
+    <p class="mb0"><strong><?= fr(e($drivers[$c]['feu_vert'])) ?></strong> : <?= fr(e($drivers[$c]['feu_vert_texte'])) ?></p>
   <?php endforeach; ?>
-<?php endif; ?>
+</div>
 
-<?php if ($p['paires']): ?>
-  <h2>Quand mes drivers se combinent</h2>
-  <?php foreach ($p['paires'] as $key): [$a, $b] = explode('_', $key); ?>
-    <div class="card soft">
-      <h3 class="mt0 combi-titre"><?= Signs::svg($a, 28) ?><?= Signs::svg($b, 28) ?> <?= e($drivers[$a]['nom'] . ' + ' . $drivers[$b]['nom']) ?></h3>
-      <p class="mt0 mb0"><?= fr(e($combis[$key] ?? '')) ?></p>
-    </div>
-  <?php endforeach; ?>
-<?php endif; ?>
+<h2>Mes conseils de conduite</h2>
+<div class="card">
+  <ol class="clean"><?php foreach (Diagnostic::pick($sig, $pr, 'conseils') as $a): ?><li><?= fr(e($a)) ?></li><?php endforeach; ?></ol>
+</div>
 
 <div class="card soft center">
   <p class="mt0"><strong><?= fr('Rendez-vous au séminaire pour la suite du permis !') ?></strong><br>

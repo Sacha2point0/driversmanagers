@@ -299,3 +299,9 @@ td.nowrap { white-space: nowrap; }
 .profil-titre, .combi-titre { display: flex; align-items: center; gap: 8px; }
 .combi-titre svg + svg { margin-left: -4px; }
 .card.secondaire { border-left: 6px solid var(--trait); }
+
+/* Définition du driver et diagnostic global */
+.definition { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--trait); font-size: 14px; line-height: 1.55; }
+.definition p { margin: 0 0 8px; }
+.card.diagnostic p { line-height: 1.6; margin: 0 0 12px; }
+.card.diagnostic p:last-child { margin-bottom: 0; }

@@ -60,7 +60,6 @@ final class Questionnaire
      * - principaux : drivers au score le plus élevé (plusieurs en cas d'égalité) ;
      * - secondaires : autres drivers marqués (au-dessus du seuil) ou proches du principal ;
      * - faible : le score le plus élevé ne dépasse pas le seuil (aucun driver déterminant) ;
-     * - paires : combinaisons à commenter, entre les 3 drivers les plus marqués au-dessus du seuil.
      */
     public static function profile(array $scores): array
     {
@@ -76,24 +75,11 @@ final class Questionnaire
         arsort($secondaires);
         $secondaires = array_keys($secondaires);
 
-        $actifs = array_values(array_filter(
-            array_merge($principaux, $secondaires),
-            fn ($d) => $scores[$d] > $l['seuil']
-        ));
-        $actifs = array_slice($actifs, 0, 3);
-        $paires = [];
-        for ($i = 0; $i < count($actifs); $i++) {
-            for ($j = $i + 1; $j < count($actifs); $j++) {
-                $paires[] = self::pairKey($actifs[$i], $actifs[$j]);
-            }
-        }
-
         return [
             'principaux'  => $principaux,
             'secondaires' => $secondaires,
             'egalite'     => count($principaux) > 1,
             'faible'      => $top <= $l['seuil'],
-            'paires'      => $paires,
             'niveaux'     => array_map(fn ($v) => self::level((int) $v), $scores),
         ];
     }
