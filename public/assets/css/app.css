@@ -274,3 +274,4 @@ td.nowrap { white-space: nowrap; }
 .corrige-reponses { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
 .corrige-reponses svg { vertical-align: middle; }
 .corrige-texte { margin: 8px 0 0; background: var(--doux); border-radius: 10px; padding: 10px 12px; font-weight: 600; line-height: 1.45; }
+.mb0 { margin-bottom: 0; }

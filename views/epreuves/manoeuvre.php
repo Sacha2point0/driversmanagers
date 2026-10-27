@@ -6,7 +6,25 @@
     <span class="kicker">Classement de l’équipe</span>
     <p class="score-big" style="letter-spacing:.2em"><?= e(implode(' ', str_split($submission['ranking']))) ?></p>
     <p><strong><?= (int) $submission['score'] ?> / 5 points</strong></p>
-    <p class="small"><?= fr('Saisi par ' . e($submission['first_name'] . ' ' . $submission['last_name']) . '. Le classement de référence sera dévoilé au débrief.') ?></p>
+    <p class="small"><?= fr('Saisi par ' . e($submission['first_name'] . ' ' . $submission['last_name']) . '.') ?></p>
+  </div>
+
+  <h2>Le corrigé</h2>
+  <p><?= fr(e($m['resume'])) ?></p>
+  <?php $ranking = (string) $submission['ranking'];
+  foreach (str_split($m['ordre']) as $i => $l):
+    $ok = ($ranking[$i] ?? '') === $l; ?>
+    <div class="carte-row corrige <?= $ok ? 'ok' : 'ko' ?>">
+      <span class="n"><?= $i + 1 ?></span><strong><?= $i + 1 ?><?= $i === 0 ? 're' : 'e' ?> : réaction <?= e($l) ?></strong>
+      <span class="pill <?= $ok ? '' : 'corail' ?>"><?= $ok ? '✓ +1 point' . ($i === 0 ? ' (+1 bonus)' : '') : '✗ votre équipe : ' . e($ranking[$i] ?? '–') ?></span>
+      <p><?= fr(e($m['reactions'][$l])) ?></p>
+      <p class="small corrige-texte"><?= fr(e($m['pourquoi'][$l] ?? '')) ?></p>
+    </div>
+  <?php endforeach; ?>
+  <div class="card soft">
+    <strong>À retenir</strong>
+    <p class="mt0"><?= fr(e($m['a_retenir'] ?? '')) ?></p>
+    <p class="small mb0"><?= fr('Les rangs 2 et 3 se discutent, c’est voulu : l’essentiel est de repérer la réaction la plus aidante, et de comprendre pourquoi la pire est la pire.') ?></p>
   </div>
 <?php else: ?>
   <p><?= fr(e($m['resume'])) ?></p>
