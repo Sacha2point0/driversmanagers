@@ -266,3 +266,11 @@ body.pleniere { background: var(--bleu); color: #fff; }
 .add-participant label { margin: 0; font-size: 14px; }
 .add-participant input { margin-top: 4px; }
 td.nowrap { white-space: nowrap; }
+
+/* Corrigé de l'examen du code */
+.carte-row.corrige { border-left: 6px solid var(--vert); }
+.carte-row.corrige.ko { border-left-color: var(--corail); }
+.carte-row.corrige .pill { float: right; }
+.corrige-reponses { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: center; }
+.corrige-reponses svg { vertical-align: middle; }
+.corrige-texte { margin: 8px 0 0; background: var(--doux); border-radius: 10px; padding: 10px 12px; font-weight: 600; line-height: 1.45; }

@@ -29,6 +29,8 @@ $dir = array_map(fn ($p) => [
   <?php endforeach; ?>
 <?php endif; ?>
 
+<p class="center" style="margin-top:24px"><a class="btn secondary" href="<?= url('/espace') ?>">Retour à mon espace</a></p>
+
 <script>
 (function () {
   var people = <?= json_encode($dir, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?>;
