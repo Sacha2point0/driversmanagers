@@ -14,6 +14,22 @@ document.addEventListener('submit', function (ev) {
   var submit = form.querySelector('button:not([type=button])');
   if (submit) {
     submit.disabled = true;
-    if (submit.dataset.busy) submit.textContent = submit.dataset.busy;
+    if (submit.dataset.busy) {
+      submit.dataset.label = submit.textContent;
+      submit.textContent = submit.dataset.busy;
+    }
   }
 }, true);
+
+// Retour arrière (cache du navigateur) : réactiver les formulaires restés en « envoi en cours ».
+window.addEventListener('pageshow', function (ev) {
+  if (!ev.persisted) return;
+  document.querySelectorAll('form[data-sent="1"]').forEach(function (form) {
+    delete form.dataset.sent;
+    var submit = form.querySelector('button:not([type=button])');
+    if (submit) {
+      submit.disabled = false;
+      if (submit.dataset.label) submit.textContent = submit.dataset.label;
+    }
+  });
+});
