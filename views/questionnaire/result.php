@@ -59,7 +59,9 @@ arsort($sorted);
     </div>
   <?php else: ?>
     <div class="lecture">
-      <?= fr('Votre driver principal se détache nettement des autres : c’est lui qui risque le plus de prendre le volant quand la pression monte.') ?>
+      <?= fr($p['egalite']
+          ? 'Ces drivers se détachent nettement des autres : ce sont eux qui risquent le plus de prendre le volant quand la pression monte, ensemble ou à tour de rôle.'
+          : 'Votre driver principal se détache nettement des autres : c’est lui qui risque le plus de prendre le volant quand la pression monte.') ?>
     </div>
   <?php endif; ?>
 </div>
