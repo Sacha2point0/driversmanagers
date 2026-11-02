@@ -305,3 +305,15 @@ td.nowrap { white-space: nowrap; }
 .definition p { margin: 0 0 8px; }
 .card.diagnostic p { line-height: 1.6; margin: 0 0 12px; }
 .card.diagnostic p:last-child { margin-bottom: 0; }
+
+/* Vue animateur du bilan d'un participant */
+.admin-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin: 6px 0 12px; }
+.admin-bilan-who { margin-bottom: 18px; }
+@media print {
+  .topbar, .footer, .no-print, .admin-nav { display: none !important; }
+  body { background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  main { max-width: none; padding: 0; }
+  .card { box-shadow: none; }
+  .voyant, .feu-vert, .card.soft, .gauge, .diagnostic p, li { break-inside: avoid; }
+  h2 { break-after: avoid; }
+}

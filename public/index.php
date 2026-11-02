@@ -52,6 +52,7 @@ $r->post('/admin/import', [C\AdminController::class, 'import']);
 $r->post('/admin/participants/ajouter', [C\AdminController::class, 'addParticipant']);
 $r->get('/admin/participants/{id}', [C\AdminController::class, 'editParticipant']);
 $r->post('/admin/participants/{id}', [C\AdminController::class, 'updateParticipant']);
+$r->get('/admin/participants/{id}/bilan', [C\AdminController::class, 'bilanParticipant']);
 $r->post('/admin/participants/{id}/supprimer', [C\AdminController::class, 'deleteParticipant']);
 $r->post('/admin/participants/{id}/reset', [C\AdminController::class, 'resetQuestionnaire']);
 $r->get('/admin/code', [C\AdminController::class, 'code']);

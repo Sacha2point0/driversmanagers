@@ -15,6 +15,18 @@ $top = $scores[$principaux[0]];
 $sorted = $scores;
 arsort($sorted);
 ?>
+<?php if (!empty($adminView)): ?>
+  <div class="no-print"><?php include ROOT . '/views/admin/_nav.php'; ?></div>
+  <div class="admin-toolbar no-print">
+    <a href="<?= url('/admin/participants/' . (int) $me['id']) ?>">← Retour à la fiche</a>
+    <button type="button" class="btn small" onclick="window.print()">Imprimer ou enregistrer en PDF</button>
+  </div>
+  <div class="card soft admin-bilan-who">
+    <strong><?= e($me['first_name'] . ' ' . $me['last_name']) ?></strong> · <?= e($me['team_name'] ?: 'sans équipe') ?> · <?= e($me['email']) ?>
+    <span class="small"> · bilan rempli le <?= e(date('d/m/Y', strtotime((string) $res['completed_at']))) ?></span>
+    <p class="small mb0 no-print"><?= fr('Vue animateur, en lecture seule : c’est la page que voit le participant. Ne la diffusez pas sans son accord.') ?></p>
+  </div>
+<?php endif; ?>
 <span class="kicker">Mon bilan de conduite</span>
 <div class="card">
   <?php if ($p['egalite']): ?>
@@ -130,8 +142,10 @@ $nomsSig = Diagnostic::liste(array_map(fn ($c) => $drivers[$c]['nom'], $sig));
   <ol class="clean"><?php foreach (Diagnostic::pick($sig, $pr, 'conseils') as $a): ?><li><?= fr(e($a)) ?></li><?php endforeach; ?></ol>
 </div>
 
+<?php if (empty($adminView)): ?>
 <div class="card soft center">
   <p class="mt0"><strong><?= fr('Rendez-vous au séminaire pour la suite du permis !') ?></strong><br>
   <span class="small"><?= fr('Votre équipe : ' . e($me['team_name'] ?: 'bientôt communiquée')) ?></span></p>
   <a class="btn secondary" href="<?= url('/espace') ?>">Retour à mon espace</a>
 </div>
+<?php endif; ?>

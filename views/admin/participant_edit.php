@@ -1,6 +1,9 @@
 <?php include ROOT . '/views/admin/_nav.php'; ?>
 <p><a href="<?= url('/admin/participants') ?>">← Retour à la liste</a></p>
 <h1><?= e($p['first_name'] . ' ' . $p['last_name']) ?></h1>
+<?php if ($p['dominant']): ?>
+  <p><a class="btn small" href="<?= url('/admin/participants/' . (int) $p['id'] . '/bilan') ?>">Voir son bilan</a></p>
+<?php endif; ?>
 
 <div class="card">
   <h3>Modifier</h3>

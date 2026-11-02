@@ -153,6 +153,33 @@ final class AdminController
         ]);
     }
 
+    /** Restitution complète du bilan d'un participant, en lecture seule (animateur uniquement). */
+    public function bilanParticipant(string $id): void
+    {
+        Auth::requireAdmin();
+        $p = Participant::find((int) $id);
+        if (!$p) {
+            flash('error', 'Ce participant n’existe plus.');
+            redirect('/admin/participants');
+        }
+        $res = Questionnaire::resultFor((int) $p['id']);
+        if (!$res) {
+            flash('info', $p['first_name'] . ' ' . $p['last_name'] . ' n’a pas encore rempli son bilan de conduite.');
+            redirect('/admin/participants/' . (int) $p['id']);
+        }
+        View::render('questionnaire/result', [
+            'title'     => 'Bilan de ' . $p['first_name'] . ' ' . $p['last_name'],
+            'admin'     => true,
+            'nav'       => 'admin/participants',
+            'adminView' => true,
+            'me'        => $p,
+            'res'       => $res,
+            'drivers'   => content('drivers'),
+            'max'       => Questionnaire::maxPerDriver(),
+            'min'       => Questionnaire::minPerDriver(),
+        ]);
+    }
+
     public function updateParticipant(string $id): void
     {
         Auth::requireAdmin();
