@@ -3,65 +3,84 @@
  * L'épreuve de conduite : les manœuvres (fiches imprimées).
  * 'ordre' = classement de référence, de la plus aidante à la moins aidante.
  * Barème : 1 point par fiche au bon rang + 1 point si la première est juste (5 max).
- * 'pourquoi' et 'a_retenir' : corrigé affiché à l'équipe après sa saisie
- * (repris du référentiel animateur, sauf 'a_retenir', à valider par Sacha).
+ * 'situation' : texte complet de la fiche papier ; 'resume' : rappel court dans l'appli.
+ * 'pourquoi' et 'a_retenir' : corrigé affiché à l'équipe après sa saisie.
+ * Les fiches papier se régénèrent avec : php tools/fiches_manoeuvres.php > fiches.html (puis impression PDF).
+ *
+ * Version validée par Sacha le 02/11/2026 : 4 réactions de même longueur et de même forme ;
+ * la meilleure accueille la réaction, valorise le driver, donne la permission et propose un cadre concret.
+ * Rangs types : 1 accueil + valorisation + permission + cadre ; 2 accueil + permission sans rien de concret ;
+ * 3 règle le problème sans accueil ; 4 valorisation qui nourrit le driver ou juge la personne (piège).
+ * Doit rester aligné avec « Satom - épreuve de conduite - fiches manœuvres.pdf » et le référentiel animateur.
  */
 return [
     1 => [
         'titre'  => 'Les commandes express',
         'driver' => 'dt',
-        'resume' => 'Adja passe les commandes avant la vérification des métrés.',
+        'resume' => 'Adja passe les commandes avant la vérification des métrés « pour gagner du temps » : deux commandes erronées ce mois-ci.',
+        'situation' => [
+            'Adja, cheffe de projet bâtiment, passe les commandes de matériaux avant que les métrés soient vérifiés, « pour gagner du temps ».',
+            'Ce mois-ci, deux commandes étaient erronées : il a fallu tout refaire et attendre une nouvelle livraison.',
+        ],
         'reactions' => [
-            'A' => '« Désormais, c’est moi qui valide toutes les commandes avant envoi. »',
-            'B' => '« Je sais que tu tiens à nos délais, et c’est précieux. On met en place 10 minutes de vérification à deux avant chaque commande, chrono en main : tu gagneras du temps sur les corrections. »',
-            'C' => '« Arrête de te précipiter, tu fais des erreurs. »',
-            'D' => '« Prends tout ton temps, la qualité d’abord. »',
+            'A' => '« Adja, deux commandes à refaire en un mois, ce n’est plus possible. À partir de lundi, aucune commande ne part sans ma validation : tu m’envoies tes métrés le matin et je te réponds dans la journée. Le temps de remettre les choses à plat. »',
+            'B' => '« Adja, je comprends que tu veuilles gagner du temps, et ton énergie fait vraiment avancer les chantiers. Ces erreurs arrivent quand on est sous pression. Prends le temps qu’il te faut à l’avenir, je te fais confiance pour trouver le bon rythme. »',
+            'C' => '« Adja, bravo pour ta réactivité, c’est exactement ce qu’il nous faut en ce moment. Pour les deux commandes erronées, relance tout de suite le fournisseur et passe les nouvelles dès ce soir : on rattrapera le retard avant vendredi. »',
+            'D' => '« Adja, je sais que tu commandes vite pour ne pas bloquer le chantier, et ta réactivité nous sauve souvent. Pour qu’elle ne nous coûte pas de nouvelles livraisons, on vérifie désormais les métrés à deux avant chaque commande : dix minutes, pas plus. »',
         ],
-        'ordre' => 'BDAC',
+        'ordre' => 'DBAC',
         'pourquoi' => [
-            'B' => 'Son besoin (tenir les délais) est reconnu, et elle reçoit un cadre court, assumé, qui lui fait gagner du temps.',
-            'D' => 'C’est la bonne permission, mais sans cadre ni échéance ; pour un Dépêche-toi, ça reste flou.',
-            'A' => 'Le problème est réglé, mais on lui retire son autonomie et le manager devient un goulot d’étranglement.',
-            'C' => 'Un reproche qui renforce la pression et ne propose rien.',
+            'D' => 'Elle accueille sa logique (ne pas bloquer le chantier) et valorise sa réactivité, puis lui donne le droit de prendre le temps dans un cadre court qui respecte son besoin de vitesse.',
+            'B' => 'L’accueil et la permission sont justes, mais il n’y a rien de concret : pour un Dépêche-toi, « prends le temps » reste flou et ne change rien.',
+            'A' => 'Le problème est traité, mais sans accueil et en lui retirant son autonomie : le manager devient un goulot d’étranglement.',
+            'C' => 'Le piège : la valorisation nourrit le driver. On lui demande d’aller encore plus vite, et la cause des erreurs reste intacte.',
         ],
-        'a_retenir' => 'Le Dépêche-toi a besoin qu’on reconnaisse son souci des délais, et d’un cadre court qui lui fait gagner du temps plutôt que d’un simple « ralentis ».',
+        'a_retenir' => 'La réaction la plus aidante ne combat pas le Dépêche-toi : elle reconnaît ce que la réactivité apporte, puis donne la permission de prendre le temps dans un cadre court et concret.',
     ],
     2 => [
         'titre'  => 'Le planning de demain',
         'driver' => 'sp',
-        'resume' => 'Fatou refuse d’envoyer un planning qu’elle juge « pas encore assez fiable ».',
+        'resume' => 'Fatou refuse pour la troisième fois d’envoyer un planning qu’elle juge « pas encore assez fiable » : remise au client demain à 9 h.',
+        'situation' => [
+            'Fatou, ingénieure méthodes, refuse pour la troisième fois d’envoyer le planning d’exécution au client. Elle le juge « pas encore assez fiable » : il reste deux incohérences mineures.',
+            'La remise au client est prévue demain à 9 h.',
+        ],
         'reactions' => [
-            'A' => '« Envoie-le tel quel, ce n’est pas grave. »',
-            'B' => '« Montre-moi les deux incohérences : on les regarde ensemble maintenant et on décide si elles bloquent. »',
-            'C' => '« Je veux un planning sans aucune erreur demain à 9h. »',
-            'D' => '« Ton planning est fiable à 90 %, c’est le niveau attendu pour demain. On signale les deux points incertains en réserve et tu me l’envoies à 18h. »',
+            'A' => '« Fatou, ta rigueur fait la confiance du client, et je comprends que ces deux points te gênent. Ton planning est fiable à 90 %, c’est le niveau attendu : on note les deux réserves et tu me l’envoies à 18 h. »',
+            'B' => '« Fatou, ta rigueur est vraiment précieuse et je comprends que tu ne veuilles rien laisser passer. Prends le temps de corriger ces deux incohérences, même tard ce soir : mieux vaut un planning sans aucune erreur, je préviendrai le client si besoin. »',
+            'C' => '« Fatou, c’est la troisième fois que ce planning est repoussé et le client l’attend demain à 9 h. Envoie-le tel quel ce soir : les deux incohérences sont mineures et personne ne les remarquera. On en reparlera après la remise. »',
+            'D' => '« Fatou, je vois que ces deux incohérences te préoccupent, et ton exigence est une vraie force pour l’équipe. Montre-les-moi maintenant : on les regarde ensemble, point par point, puis on décide ensemble si elles bloquent vraiment l’envoi au client. »',
         ],
-        'ordre' => 'DBAC',
+        'ordre' => 'ADCB',
         'pourquoi' => [
-            'D' => 'Elle reçoit un critère explicite de « suffisamment bien », une façon de traiter le doute (les réserves) et une échéance.',
-            'B' => 'Le manager l’accompagne et l’aide à trancher, mais la séance reste centrée sur le détail et lui prend du temps.',
-            'A' => 'Le délai est tenu, mais ce qui compte pour elle est balayé ; elle risque de le vivre comme un manque de considération.',
-            'C' => 'Renforce directement le driver.',
+            'A' => 'Elle valorise sa rigueur et accueille sa gêne, puis lui donne un critère explicite de « suffisamment bien », une façon de traiter le doute (les réserves) et une échéance.',
+            'D' => 'Le manager accueille et accompagne, mais la séance reste centrée sur le détail : c’est encore le driver qui mène.',
+            'C' => 'Le délai est tenu, mais ce qui compte pour elle est balayé (« personne ne les remarquera ») : elle risque de le vivre comme un manque de considération.',
+            'B' => 'Le piège : la valorisation sert à renforcer le driver (« sans aucune erreur, même tard ce soir »).',
         ],
-        'a_retenir' => 'Le Sois parfait a besoin d’un critère explicite de « suffisamment bien », d’une façon de traiter le doute et d’une échéance.',
+        'a_retenir' => 'La réaction la plus aidante ne combat pas le Sois parfait : elle reconnaît ce que la rigueur apporte, puis donne la permission du « suffisamment bien » avec un critère explicite et une échéance.',
     ],
     3 => [
         'titre'  => 'Les sous-traitants',
         'driver' => 'fp',
-        'resume' => 'Paul n’ose pas refuser les demandes de ses sous-traitants.',
+        'resume' => 'Paul n’ose pas refuser les demandes de ses sous-traitants : son équipe absorbe les retards en heures supplémentaires.',
+        'situation' => [
+            'Paul, chef de chantier, n’ose pas refuser les demandes de ses sous-traitants locaux, de peur de « casser la relation ».',
+            'Ils accumulent les retards, et c’est son équipe qui les absorbe en heures supplémentaires.',
+        ],
         'reactions' => [
-            'A' => '« Tu es trop gentil avec eux, il faut que tu sois plus ferme. »',
-            'B' => '« Je comprends que la relation compte pour toi, et elle compte aussi pour nous. Tu peux dire non sans la casser : propose-leur un point hebdomadaire avec un planning partagé, et je viens au premier pour poser le cadre avec toi. »',
-            'C' => '« À partir de maintenant, c’est moi qui gère les sous-traitants. »',
-            'D' => '« Rappelle-leur les pénalités prévues au contrat la prochaine fois qu’ils sont en retard. »',
+            'A' => '« Paul, je sais que la relation avec nos sous-traitants compte beaucoup pour toi, et c’est une qualité. Tu as le droit de leur dire non quand une demande pénalise ton équipe : fais-toi confiance, tu sauras trouver les mots le moment venu. »',
+            'B' => '« Paul, ton équipe fait trop d’heures supplémentaires à cause de ces retards. À partir de maintenant, c’est moi qui gère les échanges avec les sous-traitants : tu me fais remonter leurs demandes et je tranche. Tu pourras te concentrer sur ton chantier. »',
+            'C' => '« Paul, ta relation avec nos sous-traitants est un vrai atout, et je comprends que tu tiennes à la préserver. Tu peux dire non sans la casser : propose-leur un point hebdomadaire avec planning partagé, et je viens au premier avec toi. »',
+            'D' => '« Paul, ta gentillesse est appréciée de tous, mais là elle se retourne contre toi. Il faut que tu sois plus ferme avec eux : rappelle-leur les pénalités du contrat dès le prochain retard, et ne leur lâche plus rien. »',
         ],
-        'ordre' => 'BDCA',
+        'ordre' => 'CABD',
         'pourquoi' => [
-            'B' => 'Son besoin de relation est validé, il reçoit la permission de dire non, un outil concret et un soutien.',
-            'D' => 'L’outil est légitime, mais il est laissé seul face au conflit qu’il redoute.',
-            'C' => 'On le dessaisit : ça règle le symptôme, pas la cause.',
-            'A' => 'Un jugement sur la personne, qui risque de le faire culpabiliser.',
+            'C' => 'Elle valide son besoin de relation, lui donne la permission de dire non, un outil concret et un soutien.',
+            'A' => 'La permission est la bonne, mais il est laissé seul face au conflit qu’il redoute, sans outil.',
+            'B' => 'Le symptôme est réglé en le dessaisissant, mais pas la cause : il n’apprend pas à dire non.',
+            'D' => 'Le piège : le compliment devient un jugement sur la personne (« ta gentillesse se retourne contre toi »), puis il est poussé seul vers le conflit.',
         ],
-        'a_retenir' => 'Le Fais plaisir a besoin qu’on valide l’importance de la relation, puis de la permission de dire non, d’un outil concret et d’un soutien.',
+        'a_retenir' => 'La réaction la plus aidante ne combat pas le Fais plaisir : elle reconnaît la valeur de la relation, puis donne la permission de dire non avec un outil concret et un soutien.',
     ],
 ];
