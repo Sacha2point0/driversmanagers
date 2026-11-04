@@ -41,24 +41,4 @@ final class Participant
     {
         DB::run('UPDATE participants SET last_login_at = NOW() WHERE id = ?', [$id]);
     }
-
-    /** Liste pour la recherche de la séquence Rencontres : autres équipes uniquement, sans le driver. */
-    public static function directoryFor(array $me): array
-    {
-        return DB::all(
-            'SELECT p.id, p.first_name, p.last_name, t.name AS team_name
-             FROM participants p LEFT JOIN teams t ON t.id = p.team_id
-             WHERE p.id <> ? AND (p.team_id IS NULL OR p.team_id <> ?)
-             ORDER BY p.last_name, p.first_name',
-            [$me['id'], (int) $me['team_id']]
-        );
-    }
-
-    /** Points de permis individuels (rencontres). */
-    public static function points(int $id): int
-    {
-        $r = DB::one('SELECT COUNT(*) AS n, COALESCE(SUM(guess_ok), 0) AS ok FROM encounters WHERE participant_id = ?', [$id]);
-        return (int) $r['n'] * (int) \App\Core\Config::get('points.rencontre', 1)
-            + (int) $r['ok'] * (int) \App\Core\Config::get('points.devine', 1);
-    }
 }

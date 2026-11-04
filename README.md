@@ -5,7 +5,7 @@ Application du séminaire managers **Sogea-Satom** (WORKLAB, décembre 2026), su
 - **Avant l'événement** : chaque participant se connecte avec son email, remplit son *bilan de conduite* (questionnaire des drivers) et découvre son résultat, ses atouts, son voyant d'alerte, son feu vert et ses conseils. Il voit aussi son équipe.
 - **Le jour J** : l'animateur ouvre les épreuves une à une.
   1. **L'examen du code** : un membre de chaque équipe saisit le placement des 20 cartes du jeu imprimé (1 point par carte).
-  2. **La conduite accompagnée** : chacun enregistre ses rencontres avec des participants d'autres équipes, en notant les 4 réponses de « Mon tableau de bord » et en devinant le driver principal de la personne rencontrée. 1 point par rencontre (sans plafond) et 1 point bonus si le driver est bien deviné, au participant et à son équipe. En cas d'erreur, le vrai driver n'est pas révélé ; une bonne réponse le confirme, ce qu'il faut annoncer au briefing.
+  2. **Le manuel du conducteur** : en équipe, le mode d'emploi de chacun des 5 drivers, en deux rubriques : « Ce qui le motive » et « Ce qui le crispe ». 1 point par profil renseigné (5 points maximum). Chaque fiche s'enregistre séparément jusqu'à la validation du manuel par l'équipe.
   3. **Les manœuvres** : l'équipe saisit son classement des 4 réactions pour chacune des 3 fiches (5 points par manœuvre).
   4. **La conduite** : l'équipe rédige sa réponse à chacun des 3 cas ; l'API Claude la note sur 10 et renvoie deux phrases de retour.
 - **Écran plénière** (`/pleniere`) : classement des équipes en direct, actualisé toutes les 10 secondes.
@@ -28,7 +28,7 @@ app-permis-de-manager/
 │   ├── cartes.php           20 cartes et réponses acceptées
 │   ├── manoeuvres.php       3 manœuvres et ordre de référence
 │   ├── cas.php              3 cas (titres, missions, longueurs)
-│   ├── rencontres.php       4 questions de « Mon tableau de bord »
+│   ├── manuel.php           rubriques et consigne du manuel du conducteur
 │   └── prompts/             prompt système de l'IA et référentiel de chaque cas
 ├── config/
 │   └── config.example.php   à copier en config.php (exclu de Git)
@@ -66,7 +66,7 @@ app-permis-de-manager/
 3. **Le jour J** : ouvrir chaque séquence au bon moment depuis le tableau de bord, puis la refermer à la fin du temps imparti (plus aucune saisie possible).
 4. **Débrief** :
    - *Examen du code* : tableau de réussite par carte, pour choisir les cartes à discuter.
-   - *Rencontres* : part de bonnes devinettes par driver et confusions les plus fréquentes ; projection anonyme de 9 réponses tirées au hasard, par driver et par question.
+   - *Manuel* : avancement par équipe, toutes les réponses driver par driver, projection anonyme de 9 réponses tirées au hasard, par driver et par rubrique.
    - *Manœuvres* : répartition des réactions classées en premier.
    - *Cas* : cocher « Projeter » sur les meilleures réponses, puis ouvrir *Projeter la sélection*.
 5. **Après le séminaire** : exporter ce qui doit l'être, puis *Données → Supprimer → Tout*.
@@ -98,7 +98,7 @@ Les textes de résultat (`content/drivers.php`) sont à valider avant l'ouvertur
 
 ## Données personnelles
 
-- Chaque participant ne voit que son propre résultat ; la liste de la séquence Rencontres n'affiche jamais le driver des autres.
+- Chaque participant ne voit que son propre résultat ; aucune séquence n'affiche le driver des autres.
 - L'animateur voit les résultats individuels ; seules des statistiques anonymes (répartition des drivers, réponses anonymisées) sont destinées au client.
 - La connexion se fait par email seul, sans code de vérification : choix assumé de simplicité pour un usage interne.
 - Supprimer toutes les données après le séminaire (*Données → Supprimer → Tout*).

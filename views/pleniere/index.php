@@ -2,7 +2,7 @@
   <div class="pl-head">
     <img src="<?= asset('img/cachet.svg') ?>" alt="">
     <div><span class="kicker">Le permis de manager</span><h1>Classement des équipes</h1></div>
-    <div class="counter"><b id="enc">0</b>rencontres</div>
+    <div class="counter"><b id="enc">0</b>profils de drivers renseignés</div>
   </div>
   <div class="board" id="board"></div>
 </div>
@@ -12,7 +12,7 @@
   function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
   function load() {
     fetch(api, { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (d) {
-      document.getElementById('enc').textContent = d.encounters;
+      document.getElementById('enc').textContent = d.profils;
       var half = Math.ceil(d.teams.length / 2), rows = [];
       // Remplissage en colonnes : 1 à N/2 à gauche, la suite à droite
       for (var i = 0; i < half; i++) {

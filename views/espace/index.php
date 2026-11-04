@@ -54,12 +54,15 @@ $epreuveOpen = $open['manoeuvres_open'] || $open['cas_open'];
     ?></span>
   </a>
 
-  <?php // 3. La conduite accompagnée ?>
-  <a class="tile <?= $open['rencontres_open'] ? '' : 'locked' ?>" href="<?= url('/rencontres') ?>" style="--tile-color:var(--corail)">
+  <?php // 3. Le manuel du conducteur ?>
+  <a class="tile <?= $open['manuel_open'] ? '' : 'locked' ?>" href="<?= url('/manuel') ?>" style="--tile-color:var(--corail)">
     <span class="num">3</span>
-    <h3>La conduite accompagnée</h3>
-    <span class="small">Allez à la rencontre des autres conducteurs.</span>
-    <span class="status"><?= $open['rencontres_open'] ? $rencontres . ' rencontre' . ($rencontres > 1 ? 's' : '') . ' · ' . $points . ' point' . ($points > 1 ? 's' : '') . ' →' : 'Le jour J' ?></span>
+    <h3>Le manuel du conducteur</h3>
+    <span class="small">En équipe : le mode d’emploi de chaque driver.</span>
+    <span class="status"><?php
+      if (!$open['manuel_open']) echo 'Le jour J';
+      else echo ($manuelOk ? '✓ Validé · ' : '') . $manuel . ' / 5 profils renseignés →';
+    ?></span>
   </a>
 
   <?php // 4. L'épreuve de conduite ?>

@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS settings (
 INSERT IGNORE INTO settings (name, value) VALUES
   ('questionnaire_open', '1'),
   ('code_open', '0'),
-  ('rencontres_open', '0'),
+  ('manuel_open', '0'),
   ('manoeuvres_open', '0'),
   ('cas_open', '0');
 
@@ -58,18 +58,26 @@ CREATE TABLE IF NOT EXISTS code_submissions (
   CONSTRAINT fk_code_by FOREIGN KEY (submitted_by) REFERENCES participants(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Séquence 4 : la conduite accompagnée (rencontres individuelles)
-CREATE TABLE IF NOT EXISTS encounters (
-  id                 INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  participant_id     INT UNSIGNED NOT NULL,
-  met_participant_id INT UNSIGNED NOT NULL,
-  answers            JSON NOT NULL,
-  guess              CHAR(2) NULL,             -- driver principal deviné (sp, fp, sf, fe, dt)
-  guess_ok           TINYINT(1) NULL,          -- 1 bien deviné, 0 raté, NULL si la personne n'a pas fait son bilan
-  created_at         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE KEY uq_encounter (participant_id, met_participant_id),
-  CONSTRAINT fk_enc_p FOREIGN KEY (participant_id) REFERENCES participants(id) ON DELETE CASCADE,
-  CONSTRAINT fk_enc_m FOREIGN KEY (met_participant_id) REFERENCES participants(id) ON DELETE CASCADE
+-- Séquence 4 : le manuel du conducteur (une fiche par équipe et par driver, modifiable jusqu'à validation)
+CREATE TABLE IF NOT EXISTS manual_entries (
+  team_id     INT UNSIGNED NOT NULL,
+  driver      CHAR(2) NOT NULL,              -- sp, fp, sf, fe, dt
+  motive      VARCHAR(400) NOT NULL DEFAULT '',
+  crispe      VARCHAR(400) NOT NULL DEFAULT '',
+  updated_by  INT UNSIGNED NULL,
+  updated_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (team_id, driver),
+  CONSTRAINT fk_manual_team FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
+  CONSTRAINT fk_manual_by FOREIGN KEY (updated_by) REFERENCES participants(id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Validation du manuel par l'équipe (verrouille la saisie)
+CREATE TABLE IF NOT EXISTS manual_validations (
+  team_id       INT UNSIGNED PRIMARY KEY,
+  validated_by  INT UNSIGNED NULL,
+  validated_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_manval_team FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
+  CONSTRAINT fk_manval_by FOREIGN KEY (validated_by) REFERENCES participants(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Séquence 5a : les manœuvres (classement de 4 réactions, une saisie par équipe et par manœuvre)

@@ -199,8 +199,7 @@ ul.clean li { margin: 4px 0; }
 .rank-grid label { text-align: center; font-size: 13px; }
 .rank-grid select { text-align: center; font-weight: 900; font-size: 20px; padding: 10px 4px; }
 
-/* Rencontres */
-.search-results { max-height: 340px; overflow-y: auto; margin-top: 8px; }
+/* Listes (épreuves) */
 .person {
   display: flex; justify-content: space-between; align-items: center; gap: 10px;
   background: #fff; border-radius: 12px; padding: 12px 14px; margin: 6px 0; text-decoration: none;
@@ -209,7 +208,6 @@ ul.clean li { margin: 4px 0; }
 .person .team { font-size: 13px; opacity: .7; }
 .person > span:last-child { white-space: nowrap; font-weight: 800; }
 .person.done { opacity: .5; }
-.q-icon { font-size: 18px; margin-right: 4px; }
 
 /* Score */
 .score-big { font-weight: 900; font-size: 44px; line-height: 1; }
@@ -317,3 +315,10 @@ td.nowrap { white-space: nowrap; }
   .voyant, .feu-vert, .card.soft, .gauge, .diagnostic p, li { break-inside: avoid; }
   h2 { break-after: avoid; }
 }
+
+/* Le manuel du conducteur */
+.manuel-fiche { border-left: 6px solid var(--trait); }
+.manuel-fiche.ok { border-left-color: var(--vert); }
+.manuel-tete { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.manuel-tete .pill { margin-left: auto; }
+.manuel-pied { display: flex; justify-content: space-between; align-items: center; gap: 10px; }

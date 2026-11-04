@@ -10,6 +10,7 @@ use App\Core\View;
 use App\Models\Participant;
 use App\Services\AiEvaluator;
 use App\Services\Importer;
+use App\Services\Manuel;
 use App\Services\Questionnaire;
 use App\Services\Scoring;
 
@@ -57,7 +58,7 @@ final class AdminController
             'teams'        => (int) DB::value('SELECT COUNT(*) FROM teams'),
             'noTeam'       => (int) DB::value('SELECT COUNT(*) FROM participants WHERE team_id IS NULL'),
             'distribution' => Questionnaire::distribution(),
-            'encounters'   => (int) DB::value('SELECT COUNT(*) FROM encounters'),
+            'profils'      => Manuel::totalComplete(),
             'codeCount'    => (int) DB::value('SELECT COUNT(*) FROM code_submissions'),
             'manCount'     => (int) DB::value('SELECT COUNT(*) FROM manoeuvre_submissions'),
             'casCount'     => (int) DB::value('SELECT COUNT(*) FROM case_submissions'),
@@ -148,8 +149,6 @@ final class AdminController
             'old'      => $old,
             'teams'    => DB::all('SELECT name FROM teams ORDER BY name'),
             'drivers'  => content('drivers'),
-            'made'     => (int) DB::value('SELECT COUNT(*) FROM encounters WHERE participant_id = ?', [$p['id']]),
-            'received' => (int) DB::value('SELECT COUNT(*) FROM encounters WHERE met_participant_id = ?', [$p['id']]),
         ]);
     }
 
@@ -220,7 +219,7 @@ final class AdminController
         csrf_check();
         $p = Participant::find((int) $id);
         if ($p) {
-            // Le questionnaire et les rencontres (faites et reçues) sont supprimés en cascade
+            // Le questionnaire est supprimé en cascade ; les saisies d'équipe sont conservées
             DB::run('DELETE FROM participants WHERE id = ?', [$p['id']]);
             flash('success', $p['first_name'] . ' ' . $p['last_name'] . ' a été supprimé(e).');
         }
@@ -261,41 +260,31 @@ final class AdminController
         $this->render('admin/code', 'L’examen du code', ['subs' => $subs, 'stats' => $stats, 'cfg' => $cfg]);
     }
 
-    public function rencontres(): void
+    public function manuel(): void
     {
         Auth::requireAdmin();
-        $byTeam = DB::all(
-            'SELECT t.name, COUNT(e.id) AS n, COUNT(DISTINCT e.participant_id) AS actifs,
-               (SELECT COUNT(*) FROM participants p2 WHERE p2.team_id = t.id) AS membres
-             FROM teams t LEFT JOIN participants p ON p.team_id = t.id LEFT JOIN encounters e ON e.participant_id = p.id
-             GROUP BY t.id ORDER BY n DESC, t.name'
-        );
-        // Devinettes : pour chaque driver réel, part de bonnes réponses et confusion la plus fréquente
-        $guesses = [];
-        foreach (array_keys(content('drivers')) as $d) {
-            $guesses[$d] = ['n' => 0, 'ok' => 0, 'wrong' => []];
-        }
-        $rows = DB::all(
-            'SELECT r.dominant, e.guess, e.guess_ok FROM encounters e
-             JOIN questionnaire_results r ON r.participant_id = e.met_participant_id
-             WHERE e.guess IS NOT NULL AND e.guess_ok IS NOT NULL'
-        );
-        foreach ($rows as $r) {
-            $g = &$guesses[$r['dominant']];
-            $g['n']++;
-            if ((int) $r['guess_ok'] === 1) {
-                $g['ok']++;
-            } else {
-                $g['wrong'][$r['guess']] = ($g['wrong'][$r['guess']] ?? 0) + 1;
+        $teams = DB::all('SELECT id, name FROM teams ORDER BY name');
+        $byTeam = [];
+        $answers = [];
+        foreach ($teams as $t) {
+            $entries = Manuel::entries((int) $t['id']);
+            $byTeam[] = [
+                'name'       => $t['name'],
+                'done'       => count(array_filter($entries, fn ($e) => Manuel::isComplete($e))),
+                'validation' => Manuel::validation((int) $t['id']),
+            ];
+            foreach ($entries as $d => $e) {
+                if (trim($e['motive'] . $e['crispe']) !== '') {
+                    $answers[$d][] = $e + ['team_name' => $t['name'], 'complete' => Manuel::isComplete($e)];
+                }
             }
-            unset($g);
         }
-        $this->render('admin/rencontres', 'La conduite accompagnée', [
-            'guesses' => $guesses,
-            'byTeam'  => $byTeam,
-            'total'   => (int) DB::value('SELECT COUNT(*) FROM encounters'),
-            'drivers' => content('drivers'),
-            'questions' => content('rencontres')['questions'],
+        $this->render('admin/manuel', 'Le manuel du conducteur', [
+            'byTeam'    => $byTeam,
+            'answers'   => $answers,
+            'total'     => Manuel::totalComplete(),
+            'drivers'   => content('drivers'),
+            'rubriques' => content('manuel')['rubriques'],
         ]);
     }
 
@@ -364,33 +353,29 @@ final class AdminController
         View::render('pleniere/cas', ['title' => 'Projection', 'rows' => $rows, 'cfg' => content('cas')['cas']], 'pleniere/layout');
     }
 
-    /** Réponses de la séquence Rencontres regroupées par driver de la personne rencontrée (anonyme). */
-    public function projectionRencontres(): void
+    /** Réponses du manuel pour un driver et une rubrique, sans nom d'équipe (9 tirées au hasard). */
+    public function projectionManuel(): void
     {
         Auth::requireAdmin();
         $drivers = content('drivers');
-        $questions = content('rencontres')['questions'];
+        $rubriques = content('manuel')['rubriques'];
         $d = (string) ($_GET['driver'] ?? 'sp');
-        $q = (string) ($_GET['q'] ?? 'voyants');
-        if (!isset($drivers[$d]) || !isset($questions[$q])) {
-            redirect('/admin/rencontres');
+        $q = (string) ($_GET['q'] ?? 'motive');
+        if (!isset($drivers[$d]) || !isset($rubriques[$q])) {
+            redirect('/admin/manuel');
         }
-        $rows = DB::all(
-            'SELECT e.answers FROM encounters e JOIN questionnaire_results r ON r.participant_id = e.met_participant_id
-             WHERE r.dominant = ? ORDER BY RAND() LIMIT 9',
+        $quotes = DB::all(
+            "SELECT $q AS txt FROM manual_entries WHERE driver = ? AND TRIM($q) <> '' ORDER BY RAND() LIMIT 9",
             [$d]
         );
-        $quotes = [];
-        foreach ($rows as $r) {
-            $a = json_decode($r['answers'], true);
-            if (!empty($a[$q])) {
-                $quotes[] = $a[$q];
-            }
-        }
-        View::render('pleniere/rencontres', [
-            'title' => 'Projection', 'driver' => $d, 'drivers' => $drivers, 'q' => $q, 'questions' => $questions,
-            'quotes' => $quotes,
-            'count' => (int) DB::value('SELECT COUNT(*) FROM encounters e JOIN questionnaire_results r ON r.participant_id = e.met_participant_id WHERE r.dominant = ?', [$d]),
+        View::render('pleniere/manuel', [
+            'title'     => 'Projection',
+            'driver'    => $d,
+            'drivers'   => $drivers,
+            'q'         => $q,
+            'rubriques' => $rubriques,
+            'quotes'    => array_column($quotes, 'txt'),
+            'count'     => (int) DB::value("SELECT COUNT(*) FROM manual_entries WHERE driver = ? AND TRIM($q) <> ''", [$d]),
         ], 'pleniere/layout');
     }
 
@@ -419,10 +404,10 @@ final class AdminController
                 ));
                 break;
             case 'classement.csv':
-                $head = ['rang', 'equipe', 'examen_du_code', 'rencontres', 'manoeuvres', 'cas', 'total'];
+                $head = ['rang', 'equipe', 'examen_du_code', 'manuel_du_conducteur', 'manoeuvres', 'cas', 'total'];
                 $rows = [];
                 foreach (Scoring::leaderboard() as $i => $r) {
-                    $rows[] = [$i + 1, $r['name'], $r['code'], $r['rencontres'], $r['manoeuvres'], $r['cas'], $r['total']];
+                    $rows[] = [$i + 1, $r['name'], $r['code'], $r['manuel'], $r['manoeuvres'], $r['cas'], $r['total']];
                 }
                 break;
             case 'cas.csv':
@@ -432,15 +417,16 @@ final class AdminController
                      FROM case_submissions s JOIN teams t ON t.id = s.team_id ORDER BY s.case_no, t.name'
                 ));
                 break;
-            case 'rencontres-anonymes.csv':
-                // Pas de noms : uniquement le driver de la personne rencontrée et ce qu'elle a dit
-                $head = ['driver_personne_rencontree', 'driver_devine', 'bien_devine', 'voyants', 'conduite', 'feu_vert', 'stop'];
+            case 'manuel.csv':
+                $head = ['equipe', 'driver', 'ce_qui_le_motive', 'ce_qui_le_crispe', 'profil_renseigne', 'manuel_valide'];
                 $rows = [];
-                foreach (DB::all('SELECT r.dominant, e.answers, e.guess, e.guess_ok FROM encounters e LEFT JOIN questionnaire_results r ON r.participant_id = e.met_participant_id') as $r) {
-                    $a = json_decode($r['answers'], true);
-                    $rows[] = [$r['dominant'] ? $drivers[$r['dominant']]['nom'] : 'inconnu', $r['guess'] ? $drivers[$r['guess']]['nom'] : '',
-                        $r['guess_ok'] === null ? '' : ((int) $r['guess_ok'] ? 'oui' : 'non'),
-                        $a['voyants'] ?? '', $a['conduite'] ?? '', $a['feu_vert'] ?? '', $a['stop'] ?? ''];
+                foreach (DB::all(
+                    'SELECT t.name, m.driver, m.motive, m.crispe, (v.team_id IS NOT NULL) AS valide
+                     FROM manual_entries m JOIN teams t ON t.id = m.team_id LEFT JOIN manual_validations v ON v.team_id = m.team_id
+                     ORDER BY t.name, FIELD(m.driver, \'sp\', \'fp\', \'sf\', \'fe\', \'dt\')'
+                ) as $r) {
+                    $rows[] = [$r['name'], $drivers[$r['driver']]['nom'] ?? $r['driver'], $r['motive'], $r['crispe'],
+                        Manuel::isComplete($r) ? 'oui' : 'non', $r['valide'] ? 'oui' : 'non'];
                 }
                 break;
             default:
@@ -478,7 +464,8 @@ final class AdminController
         $pdo->exec('DELETE FROM case_submissions');
         $pdo->exec('DELETE FROM manoeuvre_submissions');
         $pdo->exec('DELETE FROM code_submissions');
-        $pdo->exec('DELETE FROM encounters');
+        $pdo->exec('DELETE FROM manual_entries');
+        $pdo->exec('DELETE FROM manual_validations');
         if ($scope === 'tout') {
             $pdo->exec('DELETE FROM questionnaire_results');
             $pdo->exec('DELETE FROM participants');

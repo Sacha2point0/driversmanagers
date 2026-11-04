@@ -8,6 +8,7 @@ use App\Core\Database as DB;
 use App\Core\Settings;
 use App\Core\View;
 use App\Models\Participant;
+use App\Services\Manuel;
 use App\Services\Scoring;
 
 final class EspaceController
@@ -24,7 +25,7 @@ final class EspaceController
         $manDone = $teamId ? (int) DB::value('SELECT COUNT(*) FROM manoeuvre_submissions WHERE team_id = ?', [$teamId]) : 0;
         $casDone = $teamId ? (int) DB::value('SELECT COUNT(*) FROM case_submissions WHERE team_id = ?', [$teamId]) : 0;
 
-        $anyEpreuveOpen = Settings::isOpen('code_open') || Settings::isOpen('rencontres_open')
+        $anyEpreuveOpen = Settings::isOpen('code_open') || Settings::isOpen('manuel_open')
             || Settings::isOpen('manoeuvres_open') || Settings::isOpen('cas_open');
 
         View::render('espace/index', [
@@ -32,8 +33,8 @@ final class EspaceController
             'me'         => $me,
             'teammates'  => $teamId ? Participant::teammates($teamId) : [],
             'code'       => $code,
-            'rencontres' => (int) DB::value('SELECT COUNT(*) FROM encounters WHERE participant_id = ?', [$me['id']]),
-            'points'     => Participant::points((int) $me['id']),
+            'manuel'     => $teamId ? Manuel::completeCount($teamId) : 0,
+            'manuelOk'   => $teamId ? (bool) Manuel::validation($teamId) : false,
             'manDone'    => $manDone,
             'casDone'    => $casDone,
             'team'       => ($teamId && $anyEpreuveOpen) ? Scoring::teamTotal($teamId) : null,

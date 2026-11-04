@@ -9,7 +9,7 @@ final class Settings
     public const SEQUENCES = [
         'questionnaire_open' => 'Le bilan de conduite (questionnaire)',
         'code_open'          => 'L’examen du code (jeu de cartes)',
-        'rencontres_open'    => 'La conduite accompagnée (rencontres)',
+        'manuel_open'        => 'Le manuel du conducteur (équipe)',
         'manoeuvres_open'    => 'L’épreuve de conduite : les manœuvres',
         'cas_open'           => 'L’épreuve de conduite : la conduite (cas)',
     ];

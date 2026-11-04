@@ -38,8 +38,7 @@ return [
 
     // Points de permis
     'points' => [
-        'rencontre' => 1,   // par rencontre validée (au participant ET à son équipe)
-        'devine'    => 1,   // bonus si le driver principal de la personne rencontrée est bien deviné
+        'manuel' => 1,   // par profil de driver renseigné dans le manuel du conducteur (à l'équipe)
     ],
 
     // Rafraîchissement de l'écran plénière (secondes)

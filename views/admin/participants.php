@@ -51,7 +51,7 @@
       <td class="nowrap">
         <a class="btn small secondary" href="<?= url('/admin/participants/' . (int) $p['id']) ?>">Modifier</a>
         <form method="post" action="<?= url('/admin/participants/' . (int) $p['id'] . '/supprimer') ?>" class="inline">
-          <?= csrf_field() ?><button class="btn small corail" data-confirm="Supprimer définitivement <?= e($p['first_name'] . ' ' . $p['last_name']) ?> ? Son bilan de conduite et ses rencontres seront effacés. Cette action est irréversible.">Supprimer</button>
+          <?= csrf_field() ?><button class="btn small corail" data-confirm="Supprimer définitivement <?= e($p['first_name'] . ' ' . $p['last_name']) ?> ? Son bilan de conduite sera effacé. Cette action est irréversible.">Supprimer</button>
         </form>
         <?php if ($p['dominant']): ?>
           <form method="post" action="<?= url('/admin/participants/' . (int) $p['id'] . '/reset') ?>" class="inline">

@@ -25,10 +25,10 @@ $r->get('/resultat', [C\QuestionnaireController::class, 'result']);
 $r->get('/code', [C\CodeController::class, 'form']);
 $r->post('/code', [C\CodeController::class, 'submit']);
 
-// La conduite accompagnée (rencontres)
-$r->get('/rencontres', [C\RencontreController::class, 'index']);
-$r->get('/rencontres/avec/{id}', [C\RencontreController::class, 'form']);
-$r->post('/rencontres/avec/{id}', [C\RencontreController::class, 'submit']);
+// Le manuel du conducteur (équipe)
+$r->get('/manuel', [C\ManuelController::class, 'index']);
+$r->post('/manuel/valider', [C\ManuelController::class, 'validate']);
+$r->post('/manuel/{driver}', [C\ManuelController::class, 'save']);
 
 // L'épreuve de conduite
 $r->get('/epreuve', [C\ConduiteController::class, 'index']);
@@ -56,14 +56,14 @@ $r->get('/admin/participants/{id}/bilan', [C\AdminController::class, 'bilanParti
 $r->post('/admin/participants/{id}/supprimer', [C\AdminController::class, 'deleteParticipant']);
 $r->post('/admin/participants/{id}/reset', [C\AdminController::class, 'resetQuestionnaire']);
 $r->get('/admin/code', [C\AdminController::class, 'code']);
-$r->get('/admin/rencontres', [C\AdminController::class, 'rencontres']);
+$r->get('/admin/manuel', [C\AdminController::class, 'manuel']);
 $r->get('/admin/manoeuvres', [C\AdminController::class, 'manoeuvres']);
 $r->get('/admin/cas', [C\AdminController::class, 'cas']);
 $r->post('/admin/cas/{team}/{no}/note', [C\AdminController::class, 'casOverride']);
 $r->post('/admin/cas/{team}/{no}/relancer', [C\AdminController::class, 'casRetry']);
 $r->post('/admin/cas/{team}/{no}/projeter', [C\AdminController::class, 'casProject']);
 $r->get('/admin/projection/cas', [C\AdminController::class, 'projectionCas']);
-$r->get('/admin/projection/rencontres', [C\AdminController::class, 'projectionRencontres']);
+$r->get('/admin/projection/manuel', [C\AdminController::class, 'projectionManuel']);
 $r->get('/admin/export/{type}', [C\AdminController::class, 'export']);
 $r->get('/admin/donnees', [C\AdminController::class, 'dataPage']);
 $r->post('/admin/purge', [C\AdminController::class, 'purge']);

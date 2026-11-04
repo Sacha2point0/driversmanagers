@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Core\Config;
 use App\Core\Database as DB;
 
 final class Scoring
@@ -45,21 +44,19 @@ final class Scoring
     /** Classement des équipes, toutes séquences confondues. */
     public static function leaderboard(): array
     {
-        $pts = (int) Config::get('points.rencontre', 1);
         $rows = DB::all(
             'SELECT t.id, t.name,
                 COALESCE((SELECT score FROM code_submissions c WHERE c.team_id = t.id), 0) AS code,
-                (SELECT COUNT(*) * ? + COALESCE(SUM(e.guess_ok), 0) * ? FROM encounters e JOIN participants p ON p.id = e.participant_id WHERE p.team_id = t.id) AS rencontres,
+                ' . Manuel::scoreSql() . ' AS manuel,
                 COALESCE((SELECT SUM(score) FROM manoeuvre_submissions m WHERE m.team_id = t.id), 0) AS manoeuvres,
                 COALESCE((SELECT SUM(' . self::caseScoreSql() . ') FROM case_submissions s WHERE s.team_id = t.id), 0) AS cas
-             FROM teams t',
-            [$pts, (int) Config::get('points.devine', 1)]
+             FROM teams t'
         );
         foreach ($rows as &$r) {
-            foreach (['code', 'rencontres', 'manoeuvres', 'cas'] as $k) {
+            foreach (['code', 'manuel', 'manoeuvres', 'cas'] as $k) {
                 $r[$k] = (int) $r[$k];
             }
-            $r['total'] = $r['code'] + $r['rencontres'] + $r['manoeuvres'] + $r['cas'];
+            $r['total'] = $r['code'] + $r['manuel'] + $r['manoeuvres'] + $r['cas'];
         }
         unset($r);
         usort($rows, fn ($a, $b) => [$b['total'], $a['name']] <=> [$a['total'], $b['name']]);
