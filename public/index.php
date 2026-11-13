@@ -15,6 +15,7 @@ $r->post('/logout', [C\AuthController::class, 'logout']);
 
 // Espace participant
 $r->get('/espace', [C\EspaceController::class, 'index']);
+$r->post('/equipe/nom', [C\EspaceController::class, 'teamName']);
 
 // Le bilan de conduite (questionnaire)
 $r->get('/questionnaire', [C\QuestionnaireController::class, 'form']);
@@ -47,6 +48,7 @@ $r->get('/admin', [C\AdminController::class, 'dashboard']);
 $r->post('/admin/sequences', [C\AdminController::class, 'sequences']);
 $r->get('/admin/participants', [C\AdminController::class, 'participants']);
 $r->post('/admin/import', [C\AdminController::class, 'import']);
+$r->post('/admin/equipes/{id}/nom', [C\AdminController::class, 'renameTeam']);
 $r->post('/admin/participants/ajouter', [C\AdminController::class, 'addParticipant']);
 $r->get('/admin/participants/{id}', [C\AdminController::class, 'editParticipant']);
 $r->post('/admin/participants/{id}', [C\AdminController::class, 'updateParticipant']);

@@ -11,9 +11,27 @@ $nbCas = count(content('cas')['cas']);
   <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">
     <div style="flex:1;min-width:220px">
       <span class="kicker">Mon équipe</span>
-      <h2 class="mt0" style="margin-bottom:4px"><?= e($me['team_name'] ?: 'Équipe à venir') ?></h2>
+      <h2 class="mt0" style="margin-bottom:4px"><?= e($me['team_label'] ?: 'Équipe à venir') ?></h2>
       <?php if ($teammates): ?>
         <p class="small mt0"><?= e(implode(' · ', array_map(fn ($t) => $t['first_name'] . ' ' . $t['last_name'], $teammates))) ?></p>
+      <?php endif; ?>
+      <?php if ($me['team_id']): ?>
+        <?php $nameForm = function (string $label) use ($teamInfo, $me) { ?>
+          <form method="post" action="<?= url('/equipe/nom') ?>" class="team-name">
+            <?= csrf_field() ?>
+            <input type="text" name="nickname" value="<?= e($teamInfo['nickname'] ?? '') ?>" maxlength="<?= \App\Models\Team::MAX ?>" minlength="<?= \App\Models\Team::MIN ?>" required autocomplete="off" placeholder="Le nom de votre équipe" aria-label="Le nom de votre équipe">
+            <button class="btn small"><?= e($label) ?></button>
+          </form>
+        <?php }; ?>
+        <?php if (empty($teamInfo['nickname'])): ?>
+          <p class="small" style="margin-bottom:6px"><strong><?= fr('Donnez un nom à votre équipe :') ?></strong> <?= fr('il s’affichera dans le classement de la plénière. Un seul membre le saisit, après accord de l’équipe.') ?></p>
+          <?php $nameForm('Enregistrer'); ?>
+        <?php else: ?>
+          <details class="small">
+            <summary><?= e('Nom choisi' . ($teamInfo['by_first'] ? ' par ' . $teamInfo['by_first'] : '') . ' · modifier') ?></summary>
+            <?php $nameForm('Modifier'); ?>
+          </details>
+        <?php endif; ?>
       <?php endif; ?>
     </div>
     <?php if ($team): ?>

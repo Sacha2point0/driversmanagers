@@ -5,7 +5,10 @@ SET NAMES utf8mb4;
 
 CREATE TABLE IF NOT EXISTS teams (
   id          INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  name        VARCHAR(100) NOT NULL UNIQUE,
+  name        VARCHAR(100) NOT NULL UNIQUE,      -- nom officiel (import CSV)
+  nickname    VARCHAR(40) NULL UNIQUE,           -- nom choisi par l'équipe dans son espace
+  nickname_by INT UNSIGNED NULL,
+  nickname_at DATETIME NULL,
   created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

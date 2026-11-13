@@ -8,6 +8,7 @@ use App\Core\Database as DB;
 use App\Core\Settings;
 use App\Core\View;
 use App\Models\Participant;
+use App\Models\Team;
 use App\Services\Manuel;
 use App\Services\Scoring;
 
@@ -29,6 +30,7 @@ final class EspaceController
         View::render('espace/index', [
             'title'      => 'Mon espace',
             'me'         => $me,
+            'teamInfo'   => $teamId ? DB::one('SELECT t.nickname, t.nickname_at, p.first_name AS by_first FROM teams t LEFT JOIN participants p ON p.id = t.nickname_by WHERE t.id = ?', [$teamId]) : null,
             'teammates'  => $teamId ? Participant::teammates($teamId) : [],
             'code'       => $code,
             'manuel'     => $teamId ? Manuel::completeCount($teamId) : 0,
@@ -37,5 +39,24 @@ final class EspaceController
             'team'       => ($teamId && $anyEpreuveOpen) ? Scoring::teamTotal($teamId) : null,
             'open'       => array_map(fn ($k) => Settings::isOpen($k), array_combine(array_keys(Settings::SEQUENCES), array_keys(Settings::SEQUENCES))),
         ]);
+    }
+
+    /** Un membre de l'équipe choisit ou modifie le nom de son équipe. */
+    public function teamName(): void
+    {
+        csrf_check();
+        $me = Auth::requireParticipant();
+        $teamId = (int) ($me['team_id'] ?? 0);
+        if (!$teamId) {
+            redirect('/espace');
+        }
+        $nickname = Team::normalize((string) ($_POST['nickname'] ?? ''));
+        if ($nickname === '') {
+            flash('error', 'Écrivez un nom pour votre équipe.');
+            redirect('/espace');
+        }
+        $error = Team::rename($teamId, $nickname, (int) $me['id']);
+        flash($error ? 'error' : 'success', $error ?? 'Votre équipe s’appelle désormais « ' . $nickname . ' ».');
+        redirect('/espace');
     }
 }

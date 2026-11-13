@@ -25,7 +25,7 @@ $isAdminArea = !empty($admin);
   <?php elseif (!$isAdminArea && $me): ?>
     <div class="who">
       <strong><?= e($me['first_name'] . ' ' . $me['last_name']) ?></strong>
-      <?= $me['team_name'] ? e($me['team_name']) . '<br>' : '' ?>
+      <?= $me['team_label'] ? e($me['team_label']) . '<br>' : '' ?>
       <form class="inline" method="post" action="<?= url('/logout') ?>"><?= csrf_field() ?><button class="linkbtn">Déconnexion</button></form>
     </div>
   <?php endif; ?>

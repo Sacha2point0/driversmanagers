@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\Team;
+
 use App\Core\Database as DB;
 
 final class Scoring
@@ -35,7 +37,7 @@ final class Scoring
     public static function leaderboard(): array
     {
         $rows = DB::all(
-            'SELECT t.id, t.name,
+            'SELECT t.id, ' . Team::labelSql() . ' AS name, t.name AS official,
                 COALESCE((SELECT score FROM code_submissions c WHERE c.team_id = t.id), 0) AS code,
                 ' . Manuel::scoreSql() . ' AS manuel,
                 COALESCE((SELECT SUM(' . self::caseScoreSql() . ') FROM case_submissions s WHERE s.team_id = t.id), 0) AS conduite

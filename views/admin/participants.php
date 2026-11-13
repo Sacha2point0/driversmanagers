@@ -45,7 +45,7 @@
     <tr>
       <td><strong><?= e($p['last_name']) ?></strong> <?= e($p['first_name']) ?></td>
       <td><?= e($p['email']) ?></td>
-      <td><?= e($p['team_name'] ?? '–') ?></td>
+      <td><?= e($p['team_name'] ?? '–') ?><?= $p['team_nickname'] ? '<br><span class="small">« ' . e($p['team_nickname']) . ' »</span>' : '' ?></td>
       <td><?= $p['dominant'] ? '<a href="' . url('/admin/participants/' . (int) $p['id'] . '/bilan') . '" title="Voir son bilan">' . e(\App\Services\Questionnaire::label($p)) . '</a>' : '<span class="muted">à faire</span>' ?></td>
       <td class="small"><?= e($p['last_login_at'] ?? '–') ?></td>
       <td class="nowrap">
@@ -58,6 +58,28 @@
             <?= csrf_field() ?><button class="btn small secondary" data-confirm="Effacer le questionnaire de <?= e($p['first_name']) ?> ? Il ou elle pourra le refaire.">Réinitialiser</button>
           </form>
         <?php endif; ?>
+      </td>
+    </tr>
+  <?php endforeach; ?>
+</table>
+</div>
+
+<h2 id="equipes">Noms des équipes</h2>
+<p class="small">Chaque équipe peut choisir son nom dans son espace ; il remplace le nom officiel dans le classement et en plénière. Vous pouvez le corriger ici, ou vider le champ pour revenir au nom officiel. Le nom officiel (celui du CSV) ne change pas.</p>
+<div class="table-wrap">
+<table class="data">
+  <tr><th>Équipe officielle</th><th>Membres</th><th>Nom choisi</th></tr>
+  <?php foreach ($teams as $t): ?>
+    <tr>
+      <td><strong><?= e($t['name']) ?></strong></td>
+      <td><?= (int) $t['members'] ?></td>
+      <td>
+        <form method="post" action="<?= url('/admin/equipes/' . (int) $t['id'] . '/nom') ?>" class="team-name" style="margin:0">
+          <?= csrf_field() ?>
+          <input type="text" name="nickname" value="<?= e($t['nickname'] ?? '') ?>" maxlength="<?= \App\Models\Team::MAX ?>" autocomplete="off" placeholder="Pas encore choisi">
+          <button class="btn small secondary">Enregistrer</button>
+        </form>
+        <?php if ($t['nickname']): ?><?php $by = trim(($t['nickname_by_first'] ?? '') . ' ' . ($t['nickname_by_last'] ?? '')); ?><span class="small muted"><?= e('par ' . ($by ?: 'l’animateur')) ?> · <?= e(date('d/m H:i', strtotime((string) $t['nickname_at']))) ?></span><?php endif; ?>
       </td>
     </tr>
   <?php endforeach; ?>

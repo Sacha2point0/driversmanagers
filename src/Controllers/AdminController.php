@@ -8,6 +8,7 @@ use App\Core\Database as DB;
 use App\Core\Settings;
 use App\Core\View;
 use App\Models\Participant;
+use App\Models\Team;
 use App\Services\AiEvaluator;
 use App\Services\Importer;
 use App\Services\Manuel;
@@ -91,10 +92,28 @@ final class AdminController
             'list'    => $list,
             'filter'  => $filter,
             'drivers' => content('drivers'),
-            'teams'   => DB::all('SELECT name FROM teams ORDER BY name'),
+            'teams'   => DB::all(
+                'SELECT t.id, t.name, t.nickname, t.nickname_at, p.first_name AS nickname_by_first, p.last_name AS nickname_by_last,
+                        (SELECT COUNT(*) FROM participants x WHERE x.team_id = t.id) AS members
+                 FROM teams t LEFT JOIN participants p ON p.id = t.nickname_by ORDER BY t.name'
+            ),
             'old'     => $_SESSION['add_old'] ?? [],
         ]);
         unset($_SESSION['add_old']);
+    }
+
+    /** Modifier ou effacer le nom choisi par une équipe (nom vide = retour au nom officiel). */
+    public function renameTeam(string $id): void
+    {
+        Auth::requireAdmin();
+        csrf_check();
+        $teamId = (int) $id;
+        if (!DB::value('SELECT id FROM teams WHERE id = ?', [$teamId])) {
+            redirect('/admin/participants');
+        }
+        $error = Team::rename($teamId, (string) ($_POST['nickname'] ?? ''), null);
+        flash($error ? 'error' : 'success', $error ?? 'Nom d’équipe mis à jour.');
+        redirect('/admin/participants#equipes');
     }
 
     public function addParticipant(): void
@@ -240,7 +259,7 @@ final class AdminController
     {
         Auth::requireAdmin();
         $cfg = content('cartes');
-        $subs = DB::all('SELECT c.*, t.name AS team_name FROM code_submissions c JOIN teams t ON t.id = c.team_id ORDER BY c.score DESC, t.name');
+        $subs = DB::all('SELECT c.*, ' . Team::adminLabelSql() . ' AS team_name FROM code_submissions c JOIN teams t ON t.id = c.team_id ORDER BY c.score DESC, t.name');
         // Statistiques par carte : zone choisie par les équipes
         $stats = [];
         foreach ($cfg['cartes'] as $no => $carte) {
@@ -262,7 +281,7 @@ final class AdminController
     public function manuel(): void
     {
         Auth::requireAdmin();
-        $teams = DB::all('SELECT id, name FROM teams ORDER BY name');
+        $teams = DB::all('SELECT t.id, ' . Team::adminLabelSql() . ' AS name FROM teams t ORDER BY t.name');
         $byTeam = [];
         $answers = [];
         foreach ($teams as $t) {
@@ -291,7 +310,7 @@ final class AdminController
     {
         Auth::requireAdmin();
         $no = (int) ($_GET['cas'] ?? 0);
-        $sql = 'SELECT s.*, t.name AS team_name, ' . Scoring::caseScoreSql() . ' AS final_score FROM case_submissions s JOIN teams t ON t.id = s.team_id';
+        $sql = 'SELECT s.*, ' . Team::adminLabelSql() . ' AS team_name, ' . Scoring::caseScoreSql() . ' AS final_score FROM case_submissions s JOIN teams t ON t.id = s.team_id';
         $subs = $no ? DB::all($sql . ' WHERE s.case_no = ? ORDER BY final_score DESC', [$no]) : DB::all($sql . ' ORDER BY s.case_no, final_score DESC');
         $this->render('admin/cas', 'L’épreuve de conduite', ['subs' => $subs, 'cfg' => content('cas')['cas'], 'filter' => $no, 'drivers' => content('drivers'), 'stats' => $this->conduiteStats()]);
     }
@@ -331,7 +350,7 @@ final class AdminController
     {
         Auth::requireAdmin();
         $rows = DB::all(
-            'SELECT s.*, t.name AS team_name, ' . Scoring::caseScoreSql() . ' AS final_score
+            'SELECT s.*, ' . Team::labelSql() . ' AS team_name, ' . Scoring::caseScoreSql() . ' AS final_score
              FROM case_submissions s JOIN teams t ON t.id = s.team_id WHERE s.projected = 1 ORDER BY s.case_no, final_score DESC'
         );
         View::render('pleniere/cas', ['title' => 'Projection', 'rows' => $rows, 'cfg' => content('cas')['cas']], 'pleniere/layout');
@@ -371,8 +390,8 @@ final class AdminController
         $drivers = content('drivers');
         switch ($type) {
             case 'participants.csv':
-                $head = ['email', 'prenom', 'nom', 'equipe', 'driver_dominant', 'questionnaire_le', 'derniere_connexion'];
-                $rows = array_map(fn ($p) => [$p['email'], $p['first_name'], $p['last_name'], $p['team_name'],
+                $head = ['email', 'prenom', 'nom', 'equipe', 'nom_choisi_par_l_equipe', 'driver_dominant', 'questionnaire_le', 'derniere_connexion'];
+                $rows = array_map(fn ($p) => [$p['email'], $p['first_name'], $p['last_name'], $p['team_name'], $p['team_nickname'],
                     $p['dominant'] ? Questionnaire::label($p) : '', $p['questionnaire_done_at'], $p['last_login_at']], Participant::all());
                 break;
             case 'scores-questionnaire.csv':
@@ -380,25 +399,25 @@ final class AdminController
                 $rows = array_map(function ($r) {
                     $prof = Questionnaire::profile(Questionnaire::scoresFromRow($r));
                     $lecture = $prof['faible'] ? 'aucun driver déterminant' : ($prof['egalite'] ? 'égalité' : ($prof['secondaires'] ? 'profil combiné' : 'driver net'));
-                    return [$r['email'], $r['first_name'], $r['last_name'], $r['name'], $r['score_sp'], $r['score_fp'], $r['score_sf'], $r['score_fe'], $r['score_dt'],
+                    return [$r['email'], $r['first_name'], $r['last_name'], $r['equipe'], $r['score_sp'], $r['score_fp'], $r['score_sf'], $r['score_fe'], $r['score_dt'],
                         Questionnaire::label($r), $lecture];
                 }, DB::all(
-                    'SELECT p.email, p.first_name, p.last_name, t.name, r.score_sp, r.score_fp, r.score_sf, r.score_fe, r.score_dt
+                    'SELECT p.email, p.first_name, p.last_name, ' . Team::adminLabelSql() . ' AS equipe, r.score_sp, r.score_fp, r.score_sf, r.score_fe, r.score_dt
                      FROM questionnaire_results r JOIN participants p ON p.id = r.participant_id LEFT JOIN teams t ON t.id = p.team_id ORDER BY p.last_name'
                 ));
                 break;
             case 'classement.csv':
-                $head = ['rang', 'equipe', 'examen_du_code', 'manuel_du_conducteur', 'epreuve_de_conduite', 'total'];
+                $head = ['rang', 'equipe', 'equipe_officielle', 'examen_du_code', 'manuel_du_conducteur', 'epreuve_de_conduite', 'total'];
                 $rows = [];
                 foreach (Scoring::leaderboard() as $i => $r) {
-                    $rows[] = [$i + 1, $r['name'], $r['code'], $r['manuel'], $r['conduite'], $r['total']];
+                    $rows[] = [$i + 1, $r['name'], $r['official'], $r['code'], $r['manuel'], $r['conduite'], $r['total']];
                 }
                 break;
             case 'cas.csv':
                 $head = ['situation', 'equipe', 'reponse', 'driver_choisi', 'driver_identifie', 'note_ia_sur_5', 'note_animateur_sur_5', 'note_finale_sur_6', 'ce_qui_fonctionne', 'pour_aller_plus_loin', 'statut_ia'];
-                $rows = array_map(fn ($r) => [$r['case_no'], $r['name'], $r['answer'], $drivers[$r['driver_guess']]['nom'] ?? '', $r['driver_ok'] ? 'oui' : 'non',
+                $rows = array_map(fn ($r) => [$r['case_no'], $r['equipe'], $r['answer'], $drivers[$r['driver_guess']]['nom'] ?? '', $r['driver_ok'] ? 'oui' : 'non',
                     $r['ai_score'], $r['score_override'], $r['final'], $r['feedback_ok'], $r['feedback_more'], $r['ai_status']], DB::all(
-                    'SELECT s.case_no, t.name, s.answer, s.driver_guess, s.driver_ok, s.ai_score, s.score_override, ' . Scoring::caseScoreSql() . ' AS final, s.feedback_ok, s.feedback_more, s.ai_status
+                    'SELECT s.case_no, ' . Team::adminLabelSql() . ' AS equipe, s.answer, s.driver_guess, s.driver_ok, s.ai_score, s.score_override, ' . Scoring::caseScoreSql() . ' AS final, s.feedback_ok, s.feedback_more, s.ai_status
                      FROM case_submissions s JOIN teams t ON t.id = s.team_id ORDER BY s.case_no, t.name'
                 ));
                 break;
@@ -406,11 +425,11 @@ final class AdminController
                 $head = ['equipe', 'driver', 'ce_qui_le_motive', 'ce_qui_le_crispe', 'profil_renseigne', 'manuel_valide'];
                 $rows = [];
                 foreach (DB::all(
-                    'SELECT t.name, m.driver, m.motive, m.crispe, (v.team_id IS NOT NULL) AS valide
+                    'SELECT ' . Team::adminLabelSql() . ' AS equipe, m.driver, m.motive, m.crispe, (v.team_id IS NOT NULL) AS valide
                      FROM manual_entries m JOIN teams t ON t.id = m.team_id LEFT JOIN manual_validations v ON v.team_id = m.team_id
                      ORDER BY t.name, FIELD(m.driver, \'sp\', \'fp\', \'sf\', \'fe\', \'dt\')'
                 ) as $r) {
-                    $rows[] = [$r['name'], $drivers[$r['driver']]['nom'] ?? $r['driver'], $r['motive'], $r['crispe'],
+                    $rows[] = [$r['equipe'], $drivers[$r['driver']]['nom'] ?? $r['driver'], $r['motive'], $r['crispe'],
                         Manuel::isComplete($r) ? 'oui' : 'non', $r['valide'] ? 'oui' : 'non'];
                 }
                 break;
@@ -450,6 +469,7 @@ final class AdminController
         $pdo->exec('DELETE FROM code_submissions');
         $pdo->exec('DELETE FROM manual_entries');
         $pdo->exec('DELETE FROM manual_validations');
+        $pdo->exec('UPDATE teams SET nickname = NULL, nickname_by = NULL, nickname_at = NULL');
         if ($scope === 'tout') {
             $pdo->exec('DELETE FROM questionnaire_results');
             $pdo->exec('DELETE FROM participants');
