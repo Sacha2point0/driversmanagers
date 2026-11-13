@@ -44,7 +44,6 @@ INSERT IGNORE INTO settings (name, value) VALUES
   ('questionnaire_open', '1'),
   ('code_open', '0'),
   ('manuel_open', '0'),
-  ('manoeuvres_open', '0'),
   ('cas_open', '0');
 
 -- Séquence 3 : l'examen du code (une saisie par équipe, verrouillée)
@@ -80,30 +79,20 @@ CREATE TABLE IF NOT EXISTS manual_validations (
   CONSTRAINT fk_manval_by FOREIGN KEY (validated_by) REFERENCES participants(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Séquence 5a : les manœuvres (classement de 4 réactions, une saisie par équipe et par manœuvre)
-CREATE TABLE IF NOT EXISTS manoeuvre_submissions (
-  team_id       INT UNSIGNED NOT NULL,
-  manoeuvre_no  TINYINT UNSIGNED NOT NULL,
-  ranking       CHAR(4) NOT NULL,
-  score         TINYINT UNSIGNED NOT NULL,
-  submitted_by  INT UNSIGNED NULL,
-  submitted_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (team_id, manoeuvre_no),
-  CONSTRAINT fk_man_team FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
-  CONSTRAINT fk_man_by FOREIGN KEY (submitted_by) REFERENCES participants(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Séquence 5b : la conduite (cas rédigés, évalués par IA)
+-- Séquence 5 : l'épreuve de conduite (6 situations rédigées, évaluées par IA, + bonus driver identifié)
 CREATE TABLE IF NOT EXISTS case_submissions (
   team_id         INT UNSIGNED NOT NULL,
   case_no         TINYINT UNSIGNED NOT NULL,
   answer          TEXT NOT NULL,
   ai_status       ENUM('pending','done','error') NOT NULL DEFAULT 'pending',
   ai_raw          TEXT NULL,
-  crit_feu_vert   TINYINT UNSIGNED NULL,
-  crit_stop       TINYINT UNSIGNED NULL,
-  crit_demande    TINYINT UNSIGNED NULL,
-  crit_ton        TINYINT UNSIGNED NULL,
+  driver_guess    CHAR(2) NULL,                 -- driver identifié par l'équipe (sp, fp, sf, fe, dt)
+  driver_ok       TINYINT(1) NOT NULL DEFAULT 0, -- 1 si c'est le bon : point bonus
+  crit_accueil    TINYINT UNSIGNED NULL,
+  crit_valorise   TINYINT UNSIGNED NULL,
+  crit_permission TINYINT UNSIGNED NULL,
+  crit_cadre      TINYINT UNSIGNED NULL,
+  crit_piege      TINYINT UNSIGNED NULL,
   ai_score        TINYINT UNSIGNED NULL,
   score_override  TINYINT UNSIGNED NULL,
   feedback_ok     VARCHAR(400) NULL,

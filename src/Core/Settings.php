@@ -10,8 +10,7 @@ final class Settings
         'questionnaire_open' => 'Le bilan de conduite (questionnaire)',
         'code_open'          => 'L’examen du code (jeu de cartes)',
         'manuel_open'        => 'Le manuel du conducteur (équipe)',
-        'manoeuvres_open'    => 'L’épreuve de conduite : les manœuvres',
-        'cas_open'           => 'L’épreuve de conduite : la conduite (cas)',
+        'cas_open'           => 'L’épreuve de conduite (6 situations)',
     ];
 
     private static ?array $cache = null;

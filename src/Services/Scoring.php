@@ -19,26 +19,16 @@ final class Scoring
         return $score;
     }
 
-    /** Manœuvres : 1 point par fiche au bon rang + 1 point si la première est juste. */
-    public static function manoeuvre(int $no, string $ranking): int
-    {
-        $ref = content('manoeuvres')[$no]['ordre'];
-        $score = 0;
-        for ($i = 0; $i < 4; $i++) {
-            if (($ranking[$i] ?? '') === $ref[$i]) {
-                $score++;
-            }
-        }
-        if (($ranking[0] ?? '') === $ref[0]) {
-            $score++;
-        }
-        return $score;
-    }
-
-    /** Score final d'un cas : la note corrigée par l'animateur prime sur celle de l'IA. */
-    public static function caseScoreSql(): string
+    /** Note de la rédaction d'une situation (sur 5) : la note de l'animateur prime sur celle de l'IA. */
+    public static function redactionSql(): string
     {
         return 'COALESCE(score_override, ai_score, 0)';
+    }
+
+    /** Score final d'une situation (sur 6) : rédaction + 1 point si le driver est identifié. */
+    public static function caseScoreSql(): string
+    {
+        return '(COALESCE(score_override, ai_score, 0) + driver_ok)';
     }
 
     /** Classement des équipes, toutes séquences confondues. */
@@ -48,15 +38,14 @@ final class Scoring
             'SELECT t.id, t.name,
                 COALESCE((SELECT score FROM code_submissions c WHERE c.team_id = t.id), 0) AS code,
                 ' . Manuel::scoreSql() . ' AS manuel,
-                COALESCE((SELECT SUM(score) FROM manoeuvre_submissions m WHERE m.team_id = t.id), 0) AS manoeuvres,
-                COALESCE((SELECT SUM(' . self::caseScoreSql() . ') FROM case_submissions s WHERE s.team_id = t.id), 0) AS cas
+                COALESCE((SELECT SUM(' . self::caseScoreSql() . ') FROM case_submissions s WHERE s.team_id = t.id), 0) AS conduite
              FROM teams t'
         );
         foreach ($rows as &$r) {
-            foreach (['code', 'manuel', 'manoeuvres', 'cas'] as $k) {
+            foreach (['code', 'manuel', 'conduite'] as $k) {
                 $r[$k] = (int) $r[$k];
             }
-            $r['total'] = $r['code'] + $r['manuel'] + $r['manoeuvres'] + $r['cas'];
+            $r['total'] = $r['code'] + $r['manuel'] + $r['conduite'];
         }
         unset($r);
         usort($rows, fn ($a, $b) => [$b['total'], $a['name']] <=> [$a['total'], $b['name']]);

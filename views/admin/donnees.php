@@ -7,7 +7,7 @@
     <a class="btn small secondary" href="<?= url('/admin/export/participants.csv') ?>">Participants</a>
     <a class="btn small secondary" href="<?= url('/admin/export/scores-questionnaire.csv') ?>">Scores du questionnaire</a>
     <a class="btn small secondary" href="<?= url('/admin/export/classement.csv') ?>">Classement</a>
-    <a class="btn small secondary" href="<?= url('/admin/export/cas.csv') ?>">Réponses aux cas</a>
+    <a class="btn small secondary" href="<?= url('/admin/export/cas.csv') ?>">Réponses de l’épreuve de conduite</a>
     <a class="btn small secondary" href="<?= url('/admin/export/manuel.csv') ?>">Manuels du conducteur</a>
   </p>
   <p class="help">Les résultats individuels du questionnaire ne doivent pas être transmis au client : seules les statistiques anonymes peuvent l’être.</p>
@@ -17,7 +17,7 @@
   <h2 class="mt0">Supprimer les données</h2>
   <form method="post" action="<?= url('/admin/purge') ?>">
     <?= csrf_field() ?>
-    <label class="switch-row"><span>Épreuves seulement (code, manuel du conducteur, manœuvres, cas). Participants et questionnaires conservés.</span><input type="radio" name="scope" value="epreuves" checked></label>
+    <label class="switch-row"><span>Épreuves seulement (code, manuel du conducteur, épreuve de conduite). Participants et questionnaires conservés.</span><input type="radio" name="scope" value="epreuves" checked></label>
     <label class="switch-row"><span>Tout : participants, équipes, questionnaires et épreuves. À faire après le séminaire.</span><input type="radio" name="scope" value="tout"></label>
     <div class="field"><label for="confirm">Tapez SUPPRIMER pour confirmer</label><input id="confirm" name="confirm" type="text" autocomplete="off"></div>
     <button class="btn corail" data-confirm="Cette suppression est définitive. Continuer ?">Supprimer définitivement</button>

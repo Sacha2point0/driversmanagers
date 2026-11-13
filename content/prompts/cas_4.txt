@@ -1,0 +1,12 @@
+Situation : « Les commandes express ». Cheffe de projet bâtiment : Adja. Driver en jeu : Dépêche-toi.
+Faits : Adja passe les commandes de matériaux avant que les métrés soient vérifiés, « pour gagner du temps ». Ce mois-ci, deux commandes étaient erronées : il a fallu tout refaire et attendre une nouvelle livraison.
+Mission : rédiger ce que le manager dit à Adja pour que ses commandes soient justes, sans éteindre sa réactivité.
+Accueil attendu : comprendre qu’elle commande vite pour ne pas bloquer le chantier.
+Valorisation attendue : sa réactivité, qui sert souvent le chantier.
+Permission attendue (Dépêche-toi) : elle a le droit de prendre le temps de vérifier ; aller moins vite à cette étape fait gagner du temps ensuite.
+Cadre attendu : une vérification courte et précise avant chaque commande (par exemple à deux, en dix minutes), qui respecte son besoin de vitesse.
+Pièges : la féliciter de sa rapidité et lui demander d’aller encore plus vite ; lui retirer son autonomie (toutes les commandes validées par le manager) ; la juger (« tu es trop impatiente »).
+Réponse de référence (5/5) : « Adja, je sais que tu commandes vite pour ne pas bloquer le chantier, et ta réactivité nous sauve souvent. Pour qu’elle ne nous coûte pas de nouvelles livraisons, on vérifie désormais les métrés à deux avant chaque commande : dix minutes, pas plus. »
+Exemple moyen (4/5 : accueil, valorisation et permission, mais rien de concret) : « Adja, je comprends que tu veuilles gagner du temps, et ton énergie fait vraiment avancer les chantiers. Ces erreurs arrivent quand on est sous pression. Prends le temps qu’il te faut à l’avenir, je te fais confiance pour trouver le bon rythme. »
+Exemple faible (1/5 : un cadre, mais sans accueil et en la dessaisissant) : « Adja, deux commandes à refaire en un mois, ce n’est plus possible. À partir de lundi, aucune commande ne part sans ma validation : tu m’envoies tes métrés le matin et je te réponds dans la journée. »
+Exemple piège (1/5 : la valorisation nourrit le driver) : « Adja, bravo pour ta réactivité, c’est exactement ce qu’il nous faut. Pour les deux commandes erronées, relance tout de suite le fournisseur et passe les nouvelles dès ce soir : on rattrapera le retard avant vendredi. »

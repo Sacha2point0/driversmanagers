@@ -12,10 +12,10 @@ include ROOT . '/views/admin/_nav.php';
   <div class="stat"><span class="small">Participants</span><b><?= $participants ?></b><span class="small"><?= $teams ?> équipes<?= $noTeam ? ' · ' . $noTeam . ' sans équipe' : '' ?></span></div>
   <div class="stat"><span class="small">Questionnaires remplis</span><b><?= $done ?> <span style="font-size:16px">(<?= $pct ?> %)</span></b><a class="small" href="<?= url('/admin/participants?filtre=a-relancer') ?>">Voir qui relancer →</a></div>
   <div class="stat"><span class="small">Profils du manuel</span><b><?= $profils ?></b></div>
-  <div class="stat"><span class="small">Saisies d’équipe</span><b><?= $codeCount + $manCount + $casCount ?></b><span class="small">code <?= $codeCount ?> · manœuvres <?= $manCount ?> · cas <?= $casCount ?></span></div>
+  <div class="stat"><span class="small">Saisies d’équipe</span><b><?= $codeCount + $casCount ?></b><span class="small">code <?= $codeCount ?> · conduite <?= $casCount ?></span></div>
 </div>
 <?php if ($casErrors): ?>
-  <div class="flash error"><?= $casErrors ?> réponse(s) aux cas sans note : <a href="<?= url('/admin/cas') ?>">les traiter</a>.</div>
+  <div class="flash error"><?= $casErrors ?> réponse(s) de l’épreuve de conduite sans note : <a href="<?= url('/admin/cas') ?>">les traiter</a>.</div>
 <?php endif; ?>
 
 <div class="cols">
@@ -54,9 +54,9 @@ include ROOT . '/views/admin/_nav.php';
 <h2>Classement des équipes</h2>
 <div class="table-wrap">
 <table class="data">
-  <tr><th>#</th><th>Équipe</th><th>Code</th><th>Manuel</th><th>Manœuvres</th><th>Cas</th><th>Total</th></tr>
+  <tr><th>#</th><th>Équipe</th><th>Code</th><th>Manuel</th><th>Conduite</th><th>Total</th></tr>
   <?php foreach ($leaderboard as $i => $r): ?>
-    <tr><td><?= $i + 1 ?></td><td><strong><?= e($r['name']) ?></strong></td><td><?= $r['code'] ?></td><td><?= $r['manuel'] ?></td><td><?= $r['manoeuvres'] ?></td><td><?= $r['cas'] ?></td><td><strong><?= $r['total'] ?></strong></td></tr>
+    <tr><td><?= $i + 1 ?></td><td><strong><?= e($r['name']) ?></strong></td><td><?= $r['code'] ?></td><td><?= $r['manuel'] ?></td><td><?= $r['conduite'] ?></td><td><strong><?= $r['total'] ?></strong></td></tr>
   <?php endforeach; ?>
 </table>
 </div>

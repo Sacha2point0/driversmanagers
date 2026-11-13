@@ -7,14 +7,16 @@ use App\Core\Config;
 use App\Core\Database as DB;
 
 /**
- * Évaluation des cas rédigés par l'API Claude (Anthropic Messages API).
+ * Évaluation des situations rédigées (épreuve de conduite) par l'API Claude (Anthropic Messages API).
+ * Grille sur 5 : accueil, valorisation, permission, cadre, sans piège (0 ou 1 chacun).
+ * Le point bonus du driver identifié est calculé à la saisie, pas par l'IA.
  * La réponse est toujours enregistrée avant l'appel : si l'API échoue,
  * le cas reste en statut « error » et l'animateur peut relancer ou noter à la main.
  */
 final class AiEvaluator
 {
     private const ENDPOINT = 'https://api.anthropic.com/v1/messages';
-    private const LIMITS = ['feu_vert' => 3, 'panneau_stop' => 2, 'demande_claire' => 3, 'ton' => 2];
+    private const LIMITS = ['accueil' => 1, 'valorisation' => 1, 'permission' => 1, 'cadre' => 1, 'sans_piege' => 1];
 
     public static function evaluate(int $teamId, int $caseNo): bool
     {
@@ -36,12 +38,12 @@ final class AiEvaluator
         }
 
         DB::run(
-            "UPDATE case_submissions SET ai_status = 'done', ai_raw = ?, crit_feu_vert = ?, crit_stop = ?, crit_demande = ?, crit_ton = ?,
+            "UPDATE case_submissions SET ai_status = 'done', ai_raw = ?, crit_accueil = ?, crit_valorise = ?, crit_permission = ?, crit_cadre = ?, crit_piege = ?,
                ai_score = ?, feedback_ok = ?, feedback_more = ?, alert = ?
              WHERE team_id = ? AND case_no = ?",
             [
                 mb_substr($raw, 0, 4000),
-                $data['feu_vert'], $data['panneau_stop'], $data['demande_claire'], $data['ton'],
+                $data['accueil'], $data['valorisation'], $data['permission'], $data['cadre'], $data['sans_piege'],
                 $data['score_total'], $data['ce_qui_fonctionne'], $data['pour_aller_plus_loin'], $data['alerte'],
                 $teamId, $caseNo,
             ]
@@ -138,8 +140,8 @@ final class AiEvaluator
             $total += $v;
         }
         $declared = (int) ($data['score_total'] ?? $total);
-        // Le modèle peut appliquer une règle de plafond (cas 2) : on retient la plus basse des deux valeurs.
-        $out['score_total'] = max(0, min($total, $declared, 10));
+        // En cas d'écart entre la somme et le total déclaré, on retient la plus basse des deux valeurs.
+        $out['score_total'] = max(0, min($total, $declared, array_sum(self::LIMITS)));
         $out['ce_qui_fonctionne'] = mb_substr(trim((string) ($data['ce_qui_fonctionne'] ?? '')), 0, 400);
         $out['pour_aller_plus_loin'] = mb_substr(trim((string) ($data['pour_aller_plus_loin'] ?? '')), 0, 400);
         $alert = $data['alerte'] ?? null;

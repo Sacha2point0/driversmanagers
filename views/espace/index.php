@@ -1,7 +1,8 @@
 <?php
 use App\Services\Signs;
 $drivers = content('drivers');
-$epreuveOpen = $open['manoeuvres_open'] || $open['cas_open'];
+$epreuveOpen = $open['cas_open'];
+$nbCas = count(content('cas')['cas']);
 ?>
 <span class="kicker">Mon espace</span>
 <h1>Bonjour <?= e($me['first_name']) ?></h1>
@@ -69,7 +70,7 @@ $epreuveOpen = $open['manoeuvres_open'] || $open['cas_open'];
   <a class="tile <?= $epreuveOpen ? '' : 'locked' ?>" href="<?= url('/epreuve') ?>" style="--tile-color:var(--vert)">
     <span class="num">4</span>
     <h3>L’épreuve de conduite</h3>
-    <span class="small">En équipe : les manœuvres, puis la conduite.</span>
-    <span class="status"><?= $epreuveOpen ? 'Manœuvres ' . $manDone . '/3 · Cas ' . $casDone . '/3 →' : 'Le jour J' ?></span>
+    <span class="small">En équipe : que dire au collaborateur dans 6 situations ?</span>
+    <span class="status"><?= $epreuveOpen ? $casDone . ' / ' . $nbCas . ' situations envoyées →' : 'Le jour J' ?></span>
   </a>
 </div>

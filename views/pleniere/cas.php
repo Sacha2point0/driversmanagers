@@ -8,7 +8,7 @@
   <?php endif; ?>
   <?php foreach ($rows as $r): ?>
     <div class="proj-answer">
-      <div class="meta">Cas <?= (int) $r['case_no'] ?> · <?= e($cfg[(int) $r['case_no']]['titre']) ?> · <?= e($r['team_name']) ?> · <?= (int) $r['final_score'] ?>/10</div>
+      <div class="meta">Situation <?= (int) $r['case_no'] ?> · <?= e($cfg[(int) $r['case_no']]['titre'] ?? '') ?> · <?= e($r['team_name']) ?> · <?= (int) $r['final_score'] ?>/<?= (int) content('cas')['max_redaction'] + (int) content('cas')['bonus_driver'] ?></div>
       <div style="white-space:pre-line"><?= e($r['answer']) ?></div>
       <?php if ($r['feedback_ok']): ?><p style="font-size:18px;margin-bottom:0">🟢 <?= fr(e($r['feedback_ok'])) ?></p><?php endif; ?>
     </div>

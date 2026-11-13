@@ -22,11 +22,9 @@ final class EspaceController
             'SELECT c.score, c.submitted_at, p.first_name FROM code_submissions c LEFT JOIN participants p ON p.id = c.submitted_by WHERE c.team_id = ?',
             [$teamId]
         ) : null;
-        $manDone = $teamId ? (int) DB::value('SELECT COUNT(*) FROM manoeuvre_submissions WHERE team_id = ?', [$teamId]) : 0;
         $casDone = $teamId ? (int) DB::value('SELECT COUNT(*) FROM case_submissions WHERE team_id = ?', [$teamId]) : 0;
 
-        $anyEpreuveOpen = Settings::isOpen('code_open') || Settings::isOpen('manuel_open')
-            || Settings::isOpen('manoeuvres_open') || Settings::isOpen('cas_open');
+        $anyEpreuveOpen = Settings::isOpen('code_open') || Settings::isOpen('manuel_open') || Settings::isOpen('cas_open');
 
         View::render('espace/index', [
             'title'      => 'Mon espace',
@@ -35,7 +33,6 @@ final class EspaceController
             'code'       => $code,
             'manuel'     => $teamId ? Manuel::completeCount($teamId) : 0,
             'manuelOk'   => $teamId ? (bool) Manuel::validation($teamId) : false,
-            'manDone'    => $manDone,
             'casDone'    => $casDone,
             'team'       => ($teamId && $anyEpreuveOpen) ? Scoring::teamTotal($teamId) : null,
             'open'       => array_map(fn ($k) => Settings::isOpen($k), array_combine(array_keys(Settings::SEQUENCES), array_keys(Settings::SEQUENCES))),

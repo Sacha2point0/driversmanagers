@@ -1,0 +1,12 @@
+Situation : « Le planning de demain ». Ingénieure méthodes : Fatou. Driver en jeu : Sois parfait.
+Faits : Fatou refuse pour la troisième fois d’envoyer le planning d’exécution au client. Elle le juge « pas encore assez fiable » : il reste deux incohérences mineures. La remise au client est prévue demain à 9 h.
+Mission : rédiger ce que le manager dit à Fatou pour que le planning parte à temps.
+Accueil attendu : comprendre que ces deux points la gênent.
+Valorisation attendue : sa rigueur, qui fait la confiance du client.
+Permission attendue (Sois parfait) : le droit au « suffisamment bien », idéalement avec un critère explicite (le niveau attendu est atteint).
+Cadre attendu : une façon de traiter le doute (par exemple noter les deux réserves) et une échéance d’envoi avant 9 h.
+Pièges : l’encourager à tout corriger quitte à travailler tard ou à retarder le client ; balayer ce qui compte pour elle (« personne ne le remarquera ») ; reprendre le détail avec elle point par point, ce qui laisse le driver mener.
+Réponse de référence (5/5) : « Fatou, ta rigueur fait la confiance du client, et je comprends que ces deux points te gênent. Ton planning est fiable à 90 %, c’est le niveau attendu : on note les deux réserves et tu me l’envoies à 18 h. »
+Exemple moyen (2/5 à 3/5 : accueil et valorisation, mais le détail continue de mener, sans permission ni échéance) : « Fatou, je vois que ces deux incohérences te préoccupent, et ton exigence est une vraie force pour l’équipe. Montre-les-moi maintenant : on les regarde ensemble, point par point, puis on décide si elles bloquent vraiment l’envoi. »
+Exemple faible (1/5 : un cadre, mais ce qui compte pour elle est balayé) : « Fatou, c’est la troisième fois que ce planning est repoussé. Envoie-le tel quel ce soir : les deux incohérences sont mineures et personne ne les remarquera. »
+Exemple piège (2/5 : accueil et valorisation, mais le driver est renforcé) : « Fatou, ta rigueur est vraiment précieuse et je comprends que tu ne veuilles rien laisser passer. Prends le temps de corriger ces deux incohérences, même tard ce soir : mieux vaut un planning sans aucune erreur. »

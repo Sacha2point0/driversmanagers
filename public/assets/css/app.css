@@ -322,3 +322,9 @@ td.nowrap { white-space: nowrap; }
 .manuel-tete { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 .manuel-tete .pill { margin-left: auto; }
 .manuel-pied { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+
+/* Épreuve de conduite : critères de la grille */
+.criteres { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 10px; }
+.criteres span { border-radius: 999px; padding: 4px 12px; font-size: 13px; font-weight: 800; background: var(--doux); }
+.criteres span.ok { background: #DDF7F0; }
+.criteres span.ko { background: #FFE6E1; }

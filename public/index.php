@@ -32,8 +32,6 @@ $r->post('/manuel/{driver}', [C\ManuelController::class, 'save']);
 
 // L'épreuve de conduite
 $r->get('/epreuve', [C\ConduiteController::class, 'index']);
-$r->get('/manoeuvres/{no}', [C\ConduiteController::class, 'manoeuvre']);
-$r->post('/manoeuvres/{no}', [C\ConduiteController::class, 'manoeuvreSubmit']);
 $r->get('/cas/{no}', [C\ConduiteController::class, 'cas']);
 $r->post('/cas/{no}', [C\ConduiteController::class, 'casSubmit']);
 
@@ -57,7 +55,6 @@ $r->post('/admin/participants/{id}/supprimer', [C\AdminController::class, 'delet
 $r->post('/admin/participants/{id}/reset', [C\AdminController::class, 'resetQuestionnaire']);
 $r->get('/admin/code', [C\AdminController::class, 'code']);
 $r->get('/admin/manuel', [C\AdminController::class, 'manuel']);
-$r->get('/admin/manoeuvres', [C\AdminController::class, 'manoeuvres']);
 $r->get('/admin/cas', [C\AdminController::class, 'cas']);
 $r->post('/admin/cas/{team}/{no}/note', [C\AdminController::class, 'casOverride']);
 $r->post('/admin/cas/{team}/{no}/relancer', [C\AdminController::class, 'casRetry']);

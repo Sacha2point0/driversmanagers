@@ -1,0 +1,12 @@
+Situation : « Les sous-traitants ». Chef de chantier : Paul. Driver en jeu : Fais plaisir.
+Faits : Paul n’ose pas refuser les demandes de ses sous-traitants locaux, de peur de « casser la relation ». Ils accumulent les retards, et c’est son équipe qui les absorbe en heures supplémentaires.
+Mission : rédiger ce que le manager dit à Paul pour qu’il reprenne la main face à ses sous-traitants.
+Accueil attendu : comprendre qu’il tient à préserver la relation.
+Valorisation attendue : sa relation avec les sous-traitants est un atout.
+Permission attendue (Fais plaisir) : il a le droit de dire non sans casser la relation.
+Cadre attendu : un outil concret (point régulier, planning partagé, règle claire) et un soutien du manager, avec une échéance.
+Pièges : le juger (« ta gentillesse se retourne contre toi »), le pousser seul vers le conflit, lui retirer la relation avec les sous-traitants.
+Réponse de référence (5/5) : « Paul, ta relation avec nos sous-traitants est un vrai atout, et je comprends que tu tiennes à la préserver. Tu peux dire non sans la casser : propose-leur un point hebdomadaire avec planning partagé, et je viens au premier avec toi. »
+Exemple moyen (3/5 à 4/5 : accueil, valorisation et permission, mais il reste seul, sans outil) : « Paul, je sais que la relation avec nos sous-traitants compte beaucoup pour toi, et c’est une qualité. Tu as le droit de leur dire non quand une demande pénalise ton équipe : fais-toi confiance, tu sauras trouver les mots. »
+Exemple faible (1/5 : un cadre, mais il est dessaisi) : « Paul, ton équipe fait trop d’heures supplémentaires. À partir de maintenant, c’est moi qui gère les échanges avec les sous-traitants : tu me fais remonter leurs demandes et je tranche. »
+Exemple piège (0 à 1/5 : jugement sur la personne, puis poussé seul vers le conflit) : « Paul, ta gentillesse est appréciée de tous, mais là elle se retourne contre toi. Sois plus ferme : rappelle-leur les pénalités du contrat dès le prochain retard, et ne leur lâche plus rien. »

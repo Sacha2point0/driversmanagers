@@ -6,8 +6,7 @@ Application du séminaire managers **Sogea-Satom** (WORKLAB, décembre 2026), su
 - **Le jour J** : l'animateur ouvre les épreuves une à une.
   1. **L'examen du code** : un membre de chaque équipe saisit le placement des 20 cartes du jeu imprimé (1 point par carte).
   2. **Le manuel du conducteur** : en équipe, le mode d'emploi de chacun des 5 drivers, en deux rubriques : « Ce qui le motive » et « Ce qui le crispe ». 1 point par profil renseigné (5 points maximum). Chaque fiche s'enregistre séparément jusqu'à la validation du manuel par l'équipe.
-  3. **Les manœuvres** : l'équipe saisit son classement des 4 réactions pour chacune des 3 fiches (5 points par manœuvre).
-  4. **La conduite** : l'équipe rédige sa réponse à chacun des 3 cas ; l'API Claude la note sur 10 et renvoie deux phrases de retour.
+  3. **L'épreuve de conduite** : 6 situations sur fiches papier. Pour chacune, l'équipe coche le driver en jeu et rédige ce que le manager dit ; l'API Claude note la réponse sur 5 (accueil, valorisation, permission, cadre concret, sans piège) et renvoie deux phrases de retour, plus 1 point si le driver est le bon (6 points par situation). L'équipe voit ensuite une réponse possible et le message à retenir.
 - **Écran plénière** (`/pleniere`) : classement des équipes en direct, actualisé toutes les 10 secondes.
 - **Espace animateur** (`/admin`) : ouverture des séquences, import des participants, suivi du questionnaire, statistiques pour le débrief, correction des notes de l'IA, projection, exports CSV, suppression des données.
 
@@ -26,10 +25,9 @@ app-permis-de-manager/
 │   ├── questionnaire.php    questions et échelle (questionnaire des drivers WORKLAB)
 │   ├── drivers.php          textes de résultat des 5 drivers
 │   ├── cartes.php           20 cartes et réponses acceptées
-│   ├── manoeuvres.php       3 manœuvres et ordre de référence
-│   ├── cas.php              3 cas (titres, missions, longueurs)
+│   ├── cas.php              6 situations de l'épreuve de conduite (textes des fiches, missions, réponses possibles)
 │   ├── manuel.php           rubriques et consigne du manuel du conducteur
-│   └── prompts/             prompt système de l'IA et référentiel de chaque cas
+│   └── prompts/             prompt système de l'IA et référentiel de chaque situation
 ├── config/
 │   └── config.example.php   à copier en config.php (exclu de Git)
 ├── database/schema.sql  ← création des tables
@@ -67,8 +65,7 @@ app-permis-de-manager/
 4. **Débrief** :
    - *Examen du code* : tableau de réussite par carte, pour choisir les cartes à discuter.
    - *Manuel* : avancement par équipe, toutes les réponses driver par driver, projection anonyme de 9 réponses tirées au hasard, par driver et par rubrique.
-   - *Manœuvres* : répartition des réactions classées en premier.
-   - *Cas* : cocher « Projeter » sur les meilleures réponses, puis ouvrir *Projeter la sélection*.
+   - *Conduite (IA)* : par situation, part des équipes qui ont trouvé le driver et réussite par critère ; cocher « Projeter » sur les meilleures réponses, puis ouvrir *Projeter la sélection*.
 5. **Après le séminaire** : exporter ce qui doit l'être, puis *Données → Supprimer → Tout*.
 
 ---
@@ -87,12 +84,12 @@ Les textes de résultat (`content/drivers.php`) sont à valider avant l'ouvertur
 
 ---
 
-## L'évaluation des cas par l'IA
+## L'évaluation de l'épreuve de conduite par l'IA
 
 - La réponse de l'équipe est **toujours enregistrée avant** l'appel à l'API.
-- L'appel se fait au moment de l'envoi (réponse attendue en JSON ; le paramètre `temperature` n’est pas envoyé, les modèles Claude récents le refusent). En cas d'échec (clé absente, API saturée, délai dépassé), la réponse passe en *échec IA* : l'animateur peut **relancer l'IA** ou **saisir une note** depuis *Cas (IA)*.
-- Une note saisie par l'animateur remplace toujours celle de l'IA.
-- Le prompt système et le référentiel de chaque cas sont dans `content/prompts/`. Tester une dizaine de réponses par cas avant l'événement et ajuster le référentiel si une note paraît injuste.
+- L'appel se fait au moment de l'envoi (réponse attendue en JSON ; le paramètre `temperature` n’est pas envoyé, les modèles Claude récents le refusent). En cas d'échec (clé absente, API saturée, délai dépassé), la réponse passe en *échec IA* : l'animateur peut **relancer l'IA** ou **saisir une note sur 5** depuis *Conduite (IA)*.
+- Une note saisie par l'animateur remplace toujours celle de l'IA ; le point du driver identifié s'ajoute dans tous les cas.
+- Le prompt système et le référentiel de chaque situation sont dans `content/prompts/` (`cas_1.txt` à `cas_6.txt`, avec des exemples d'étalonnage). Tester quelques réponses par situation avant l'événement et ajuster le référentiel si une note paraît injuste.
 
 ---
 

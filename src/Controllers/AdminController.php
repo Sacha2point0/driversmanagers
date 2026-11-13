@@ -60,7 +60,6 @@ final class AdminController
             'distribution' => Questionnaire::distribution(),
             'profils'      => Manuel::totalComplete(),
             'codeCount'    => (int) DB::value('SELECT COUNT(*) FROM code_submissions'),
-            'manCount'     => (int) DB::value('SELECT COUNT(*) FROM manoeuvre_submissions'),
             'casCount'     => (int) DB::value('SELECT COUNT(*) FROM case_submissions'),
             'casErrors'    => (int) DB::value("SELECT COUNT(*) FROM case_submissions WHERE ai_status <> 'done' AND score_override IS NULL"),
             'leaderboard'  => Scoring::leaderboard(),
@@ -288,28 +287,13 @@ final class AdminController
         ]);
     }
 
-    public function manoeuvres(): void
-    {
-        Auth::requireAdmin();
-        $cfg = content('manoeuvres');
-        $subs = DB::all('SELECT s.*, t.name AS team_name FROM manoeuvre_submissions s JOIN teams t ON t.id = s.team_id ORDER BY s.manoeuvre_no, s.score DESC, t.name');
-        $first = [];
-        foreach ($cfg as $no => $m) {
-            $first[$no] = ['A' => 0, 'B' => 0, 'C' => 0, 'D' => 0];
-        }
-        foreach ($subs as $s) {
-            $first[(int) $s['manoeuvre_no']][$s['ranking'][0]]++;
-        }
-        $this->render('admin/manoeuvres', 'Les manœuvres', ['cfg' => $cfg, 'subs' => $subs, 'first' => $first]);
-    }
-
     public function cas(): void
     {
         Auth::requireAdmin();
         $no = (int) ($_GET['cas'] ?? 0);
         $sql = 'SELECT s.*, t.name AS team_name, ' . Scoring::caseScoreSql() . ' AS final_score FROM case_submissions s JOIN teams t ON t.id = s.team_id';
         $subs = $no ? DB::all($sql . ' WHERE s.case_no = ? ORDER BY final_score DESC', [$no]) : DB::all($sql . ' ORDER BY s.case_no, final_score DESC');
-        $this->render('admin/cas', 'La conduite (cas)', ['subs' => $subs, 'cfg' => content('cas')['cas'], 'filter' => $no]);
+        $this->render('admin/cas', 'L’épreuve de conduite', ['subs' => $subs, 'cfg' => content('cas')['cas'], 'filter' => $no, 'drivers' => content('drivers'), 'stats' => $this->conduiteStats()]);
     }
 
     public function casOverride(string $team, string $no): void
@@ -317,7 +301,7 @@ final class AdminController
         Auth::requireAdmin();
         csrf_check();
         $v = trim((string) ($_POST['note'] ?? ''));
-        $note = $v === '' ? null : max(0, min(10, (int) $v));
+        $note = $v === '' ? null : max(0, min((int) content('cas')['max_redaction'], (int) $v));
         DB::run('UPDATE case_submissions SET score_override = ? WHERE team_id = ? AND case_no = ?', [$note, (int) $team, (int) $no]);
         flash('success', $note === null ? 'Note de l’animateur retirée : la note de l’IA s’applique.' : 'Note corrigée.');
         redirect('/admin/cas?cas=' . (int) ($_POST['filtre'] ?? 0));
@@ -404,16 +388,17 @@ final class AdminController
                 ));
                 break;
             case 'classement.csv':
-                $head = ['rang', 'equipe', 'examen_du_code', 'manuel_du_conducteur', 'manoeuvres', 'cas', 'total'];
+                $head = ['rang', 'equipe', 'examen_du_code', 'manuel_du_conducteur', 'epreuve_de_conduite', 'total'];
                 $rows = [];
                 foreach (Scoring::leaderboard() as $i => $r) {
-                    $rows[] = [$i + 1, $r['name'], $r['code'], $r['manuel'], $r['manoeuvres'], $r['cas'], $r['total']];
+                    $rows[] = [$i + 1, $r['name'], $r['code'], $r['manuel'], $r['conduite'], $r['total']];
                 }
                 break;
             case 'cas.csv':
-                $head = ['cas', 'equipe', 'reponse', 'note_ia', 'note_animateur', 'note_finale', 'ce_qui_fonctionne', 'pour_aller_plus_loin', 'statut_ia'];
-                $rows = array_map(fn ($r) => array_values($r), DB::all(
-                    'SELECT s.case_no, t.name, s.answer, s.ai_score, s.score_override, ' . Scoring::caseScoreSql() . ', s.feedback_ok, s.feedback_more, s.ai_status
+                $head = ['situation', 'equipe', 'reponse', 'driver_choisi', 'driver_identifie', 'note_ia_sur_5', 'note_animateur_sur_5', 'note_finale_sur_6', 'ce_qui_fonctionne', 'pour_aller_plus_loin', 'statut_ia'];
+                $rows = array_map(fn ($r) => [$r['case_no'], $r['name'], $r['answer'], $drivers[$r['driver_guess']]['nom'] ?? '', $r['driver_ok'] ? 'oui' : 'non',
+                    $r['ai_score'], $r['score_override'], $r['final'], $r['feedback_ok'], $r['feedback_more'], $r['ai_status']], DB::all(
+                    'SELECT s.case_no, t.name, s.answer, s.driver_guess, s.driver_ok, s.ai_score, s.score_override, ' . Scoring::caseScoreSql() . ' AS final, s.feedback_ok, s.feedback_more, s.ai_status
                      FROM case_submissions s JOIN teams t ON t.id = s.team_id ORDER BY s.case_no, t.name'
                 ));
                 break;
@@ -462,7 +447,6 @@ final class AdminController
         $scope = (string) ($_POST['scope'] ?? 'epreuves');
         $pdo = DB::pdo();
         $pdo->exec('DELETE FROM case_submissions');
-        $pdo->exec('DELETE FROM manoeuvre_submissions');
         $pdo->exec('DELETE FROM code_submissions');
         $pdo->exec('DELETE FROM manual_entries');
         $pdo->exec('DELETE FROM manual_validations');
@@ -473,6 +457,22 @@ final class AdminController
         }
         flash('success', $scope === 'tout' ? 'Toutes les données ont été supprimées.' : 'Les données des épreuves ont été supprimées (questionnaires et participants conservés).');
         redirect('/admin/donnees');
+    }
+
+    /** Statistiques de débrief par situation : réponses, note moyenne, driver identifié, réussite par critère. */
+    private function conduiteStats(): array
+    {
+        $rows = DB::all(
+            'SELECT case_no, COUNT(*) AS n, AVG(' . Scoring::caseScoreSql() . ') AS moyenne, AVG(driver_ok) AS driver,
+                    AVG(crit_accueil) AS accueil, AVG(crit_valorise) AS valorise, AVG(crit_permission) AS permission,
+                    AVG(crit_cadre) AS cadre, AVG(crit_piege) AS piege
+             FROM case_submissions GROUP BY case_no'
+        );
+        $out = [];
+        foreach ($rows as $r) {
+            $out[(int) $r['case_no']] = $r;
+        }
+        return $out;
     }
 
     private function render(string $view, string $title, array $data): void

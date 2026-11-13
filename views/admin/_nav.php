@@ -4,8 +4,7 @@ $items = [
     'admin/participants' => ['/admin/participants', 'Participants'],
     'admin/code'         => ['/admin/code', 'Examen du code'],
     'admin/manuel'       => ['/admin/manuel', 'Manuel'],
-    'admin/manoeuvres'   => ['/admin/manoeuvres', 'Manœuvres'],
-    'admin/cas'          => ['/admin/cas', 'Cas (IA)'],
+    'admin/cas'          => ['/admin/cas', 'Conduite (IA)'],
     'admin/donnees'      => ['/admin/donnees', 'Données'],
 ];
 ?>

@@ -26,7 +26,7 @@
   <p class="small mt0">
     Bilan de conduite : <?= $p['dominant'] ? 'fait (' . e(\App\Services\Questionnaire::label($p)) . ')' : 'à faire' ?>.
   </p>
-  <p class="small">La suppression efface définitivement le participant et son bilan de conduite. Les saisies d’équipe (code, manuel, manœuvres, cas) sont conservées.</p>
+  <p class="small">La suppression efface définitivement le participant et son bilan de conduite. Les saisies d’équipe (code, manuel, épreuve de conduite) sont conservées.</p>
   <form method="post" action="<?= url('/admin/participants/' . (int) $p['id'] . '/supprimer') ?>">
     <?= csrf_field() ?>
     <button class="btn small corail" data-confirm="Supprimer définitivement <?= e($p['first_name'] . ' ' . $p['last_name']) ?> ? Cette action est irréversible.">Supprimer ce participant</button>
