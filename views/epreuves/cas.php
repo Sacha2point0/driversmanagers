@@ -19,6 +19,12 @@ $criteres = [
 <h1><?= e($c['titre']) ?></h1>
 
 <?php if ($submission): $evalue = $submission['ai_status'] === 'done' || $submission['score_override'] !== null; ?>
+  <details class="card">
+    <summary><strong>Relire la situation</strong></summary>
+    <p><?= fr(e($c['contexte'])) ?></p>
+    <?php foreach ($c['situation'] as $para): ?><p><?= fr(e($para)) ?></p><?php endforeach; ?>
+    <p class="mb0"><strong><?= fr(e($c['mission'])) ?></strong></p>
+  </details>
   <div class="card">
     <span class="kicker">Réponse de l’équipe</span>
     <p style="white-space:pre-line"><?= e($submission['answer']) ?></p>
@@ -64,10 +70,16 @@ $criteres = [
     <div class="flash info"><?= fr('Votre réponse est enregistrée. L’examinateur la notera dans quelques minutes : revenez sur cette page un peu plus tard.') ?></div>
   <?php endif; ?>
 <?php else: ?>
+  <div class="card">
+    <span class="kicker">Le contexte</span>
+    <p><?= fr(e($c['contexte'])) ?></p>
+    <span class="kicker">La situation</span>
+    <?php foreach ($c['situation'] as $para): ?><p><?= fr(e($para)) ?></p><?php endforeach; ?>
+  </div>
   <div class="card soft">
-    <p class="mt0"><?= fr(e($c['resume'])) ?></p>
+    <span class="kicker">Votre mission</span>
     <p class="mt0"><strong><?= fr(e($c['mission'])) ?></strong></p>
-    <p class="small mt0"><?= fr('Le détail de la situation est sur votre fiche papier. Rédigez en 5 à 8 lignes, comme si vous lui parliez.') ?></p>
+    <p class="small mt0"><?= fr('En 5 à 8 lignes, avec vos propres mots, comme si vous lui parliez.') ?></p>
   </div>
   <form method="post" action="<?= url('/cas/' . (int) $no) ?>" id="cas-form">
     <?= csrf_field() ?>
